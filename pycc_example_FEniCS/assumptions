@@ -1,0 +1,8 @@
+
+
+tf = Functions.FixedTensorFunction(numpy.array([sf*s_l, sf*s_t]))
+betyr at det lages en tensor 
+
+tf = [[sf*s_l, 0],[0, sf*s_l]]
+
+

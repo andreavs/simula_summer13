@@ -71,7 +71,7 @@ def test_manufactured_solution():
 		f_proj = project(f,space)
 		return f_proj.vector().array()
 
-	dt = 0.1
+	dt = 0.01
 	solver = Monodomain_solver(manufactured_source, dt=dt)
 	method = Time_solver('CN')
 
@@ -94,7 +94,7 @@ def test_manufactured_solution():
 	solver.solve(T, savenumpy=save)
 	u_e.t = (solver.n_steps)*dt
 	u_e_array = project(u_e,solver.V).vector().array()
-	test = (solver.u_p.vector().array() - u_e_array).sum()
+	test = np.linalg.norm(solver.u_p.vector().array() - u_e_array)
 	print test
 	savemovie = False
 	if save:
@@ -106,10 +106,54 @@ def test_manufactured_solution():
 	nt.assert_almost_equal(test, 0, delta=delta)
 
 def test_error_convergence():
-	print "not implemented!"
-	### test criterion
-	delta = 1e-10
-	nt.assert_almost_equal(1, 1, delta=delta)
+	def nonlinear_D(v):
+		return 1+v**2
+
+	def manufactured_source(v, mesh, space, time):
+		rho = 1
+		f = Expression('-rho*x[0]*x[0]*x[0]/3. + rho*x[0]*x[0]/2. + pow(t,3)*pow(x[0],4)*(pow(x[0],3)*8./9. - \
+			28.*pow(x[0], 2)/9. + 7.*pow(x[0],1)/2. - 5./4.) + 2.*t*x[0] - t', t=time, rho=rho)
+		f_proj = project(f,space)
+		return f_proj.vector().array()
+
+	dt = 0.1
+	d_nodes = 10
+	errorlist = []
+
+	for i in range(5):
+		solver = Monodomain_solver(manufactured_source, dt=dt)
+		method = Time_solver('CN')
+
+
+		u0 = Constant('0.0')
+		u_e = Expression('t*x[0]*x[0]*(1./2 - x[0]/3.)', t = 0)
+		
+		x_nodes, y_nodes = d_nodes, d_nodes
+		solver.set_geometry([x_nodes,y_nodes])
+		solver.set_time_solver_method(method);
+		solver.set_initial_condition(u0);
+		solver.set_boundary_conditions();
+		solver.set_M(((1,0),(0,1)))
+		solver.D = nonlinear_D
+
+
+
+		save = False
+		T = 2
+		solver.solve(T, savenumpy=save)
+		u_e.t = (solver.n_steps)*dt
+		u_e_array = project(u_e,solver.V).vector().array()
+		test = np.linalg.norm(solver.u_p.vector().array() - u_e_array)
+		print test
+		errorlist.append(test)
+		savemovie = False
+		if save:
+			mcrtmv(int(solver.n_steps), 0.01,1.0,1.0,x_nodes+1,y_nodes+1, \
+				savemovie=savemovie, mvname='test', vmin=0, vmax=3)
+
+		dt/=2.
+		d_nodes*=2
+	print errorlist
 
 
 
@@ -117,6 +161,6 @@ def test_error_convergence():
 if __name__ == '__main__':
 	#test_consentration_conservation()
 	#test_constant_solution()
-	test_manufactured_solution()
+	#test_manufactured_solution()
 
-	#test_error_convergence()
+	test_error_convergence()

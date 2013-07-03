@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	print "P0", P0[P0[:,1]!=0.,1]
 	print "P1", P1[ind_stim,1]
 
-	solver = ImplicitEuler()
+	solver = ThetaSolver()
 	ode_solver = ODESystemSolver(int(N), solver, ode)
 	
 	### put the ode solver inside wrapper
