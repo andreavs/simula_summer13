@@ -26,7 +26,6 @@ class Monodomain_solver:
     k: step number of the most recently computed solution
     f: callable object implementing f(v, t)
     dt: time step (assumed constant)
-    ...many more!
 	"""
 	def __init__(self,f,dim=2,dt=0.01):
 		self.f = f
@@ -117,15 +116,16 @@ class Monodomain_solver:
 			print 'M must be set before variational form is defined'
 			sys.exit(1)
 
-	def source_term_solve_for_time_step(self):
+	def source_term_solve_for_time_step(self, dt):
+		time = self.t[-1]
 		if isinstance(self.f, types.FunctionType):
-			time = self.t[-1]
-			new_u =self.u_p.vector().array() + self.dt*self.f(self.u_p.vector().array(), self.mesh, self.V, time)
+			u_p = self.u_p.vector().array()
+			mid_u = np.copy(u_p + (dt/2.)*self.f(u_p, self.mesh, self.V, time))
+			new_u = np.copy(u_p + (dt)*self.f(mid_u, self.mesh, self.V, time))
 			self.u_n.vector().set_local(new_u)
-			#forward euler yall! 
+ 
 		elif isinstance(self.f, Goss_wrapper):
-			time = self.t[-1]
-			self.f.advance(self.u_n, time)
+			self.f.advance(self.u_n, time, dt)
 			#self.u_p.vector().set_local(new_u);
 		else:
 			print "something is wrong with f(v)!!"
@@ -134,21 +134,39 @@ class Monodomain_solver:
 	def solve_for_time_step(self):
 		if self.time_solver_method_set and self.boundary_conditions_set \
 		and self.initial_condition_set and self.M_set and self.form_set:
+
 			print 'solving for time step ' + str(self.step_counter) + "... ", 
 			self.step_counter += 1
-			self.source_term_solve_for_time_step() # does the time step for the non-PDE part
+			theta = 0.5
+			dt = theta*self.dt
+			self.source_term_solve_for_time_step(dt) # does the half time step for the ODE part
+			dt = self.dt
+			self.u_p.assign(self.u_n)
+			solve(self.a == self.L, self.u_n)
+			#print self.u_n.vector().array().sum()
+			self.u_p.assign(self.u_n)
+
+			dt = theta*self.dt
+			self.source_term_solve_for_time_step(dt) # does the final time step for the ODE part
+			self.u_p.assign(self.u_n)
+
+
+
+			'''
+			self.source_term_solve_for_time_step(self.dt) # does the time step for the ODE part
 			
 			self.u_p.assign(self.u_n)
 			solve(self.a == self.L, self.u_n)
 			print self.u_n.vector().array().sum()
 			self.u_p.assign(self.u_n)
+			'''
 			return self.u_n
 
 		else:
 			print 'System not initialized!'
 
 
-	def solve(self, T, savenumpy=False):
+	def solve(self, T, savenumpy=False, plot_realtime=False):
 		time = self.t[0]
 		self.n_steps = int(T/self.dt)
 		self.set_form()
@@ -171,8 +189,10 @@ class Monodomain_solver:
 			if savenumpy:
 				#print str(self.meshtype[0])
 				usave, X,Y = numpyfy(u_n, self.mesh, self.meshtype, self.V)
-				filename = 'solution_%06d.txt' % self.step_counter
-				np.savetxt(filename, usave, fmt='%.18e', delimiter=' ', newline='\n')
+				filename = 'solution_%06d.npy' % self.step_counter
+				np.save(filename, usave)
+			if plot_realtime:
+				plot(self.u_p, wireframe=True)
 
 ### end of class monodomain_solver ###
 
@@ -221,7 +241,7 @@ def default_f(v, mesh, space, time):
 	"""
 	return -v
 
-def gaussian_u0_2d(sigma = 0.5):
+def gaussian_u0_2d():
 	"""
 	creates a gaussian bell curve centered at the origin
 	"""

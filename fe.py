@@ -57,7 +57,7 @@ def make_parameter_field(coor, ode, **parameters):
 	
     return P
 
-def advance(self, u, t):
+def advance(self, u, t, dt):
 	assert(isinstance(u, Function))
 	goss_solver = self.goss_solver
 	dof_temp_values = u.vector().array()
@@ -73,24 +73,14 @@ def advance(self, u, t):
 	goss_solver.forward(t, dt)
 	
 	goss_solver.get_field_states(self.vertex_temp_values)
-	#print "after forward STIM:", self.vertex_temp_values[ind_stim]
-	#print "after forward NOSTIM:", self.vertex_temp_values[1-ind_stim]
-	# goss_solver.get_field_states(u)
-	# u[:] = u[dum]
+
 	dof_temp_values[:] = self.vertex_temp_values[self.vertex_to_dof_map]
 	u.vector()[:] = dof_temp_values
-	#V_ordered = V[self.vertex_to_dof_map]
-	#V_ordered = np.copy(V)
-	#for i in range(N):
-	#	V_ordered[dum[i]] = V[i]
-
-	#if t > 5:
-		#raise RuntimeError("STOP")
 	return u
 
 if __name__ == '__main__':
 	### Parameters
-	x_nodes, y_nodes = 49, 49
+	x_nodes, y_nodes = 49, 49 ## no. of nodes in each dir
 	N = (x_nodes+1)*(y_nodes+1)
 	T = 100
 	dt = 0.1
@@ -110,7 +100,6 @@ if __name__ == '__main__':
 	vertex_to_dof_map =  space.dofmap().vertex_to_dof_map(mesh)
 	   
 	ist = np.zeros(len(vertex_to_dof_map), dtype=np.float_) 
-	#ist[vertex_to_dof_map] = stimulation_domain(mesh.coordinates())
 	ist = stimulation_domain(mesh.coordinates(), amp= -10)
 
 	P0 = make_parameter_field(mesh.coordinates(), ode)
@@ -141,7 +130,7 @@ if __name__ == '__main__':
 	solver.set_boundary_conditions();
 
 	### setting up isotropic M
-	M00 = Constant('5e-4')
+	M00 = Constant('1e-4')
 	M01 = Constant('0.0')
 	M10 = Constant('0.0')
 	M11 = Constant('1e-4')
