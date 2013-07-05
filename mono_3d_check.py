@@ -12,7 +12,8 @@ def myf(v, mesh, space, time):
 	return 0
 
 
-solver = Monodomain_solver(myf, dim=3, dt=0.1)
+solver = Monodomain_solver(dim=3, dt=0.1)
+solver.set_source_term(myf)
 method = Time_solver('CN')
 
 x_nodes, y_nodes, z_nodes = 30, 30, 30
@@ -21,7 +22,8 @@ solver.set_geometry([x_nodes,y_nodes, z_nodes])
 solver.set_time_solver_method(method);
 solver.set_initial_condition(gaussian_u0_3d());
 solver.set_boundary_conditions();
-solver.set_M(((1e-2,0,0),(0,1e-2,0),(0,0,1e-2)))
+M = ((1e-2,0,0),(0,1e-2,0),(0,0,1e-2))
+solver.set_M(M)
 
 save = True
 solver.solve(3, savenumpy=save, plot_realtime=False)

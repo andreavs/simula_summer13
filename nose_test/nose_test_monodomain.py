@@ -12,7 +12,8 @@ def test_consentration_conservation():
 		return 0
 
 
-	solver = Monodomain_solver(f, dt=0.01)
+	solver = Monodomain_solver(dt=0.01)
+	solver.set_source_term(f)
 	method = Time_solver('CN')
 	x_nodes, y_nodes = 20, 20
 	solver.set_geometry([x_nodes,y_nodes])
@@ -39,7 +40,8 @@ def test_constant_solution():
 		return 0
 
 
-	solver = Monodomain_solver(f, dt=0.01)
+	solver = Monodomain_solver(dt=0.01)
+	solver.set_source_term(f)
 	method = Time_solver('CN')
 	x_nodes, y_nodes = 20, 20
 	solver.set_geometry([x_nodes,y_nodes])
@@ -72,7 +74,8 @@ def test_manufactured_solution():
 		return f_proj.vector().array()
 
 	dt = 0.01
-	solver = Monodomain_solver(manufactured_source, dt=dt)
+	solver = Monodomain_solver(dt=dt)
+	solver.set_source_term(manufactured_source)
 	method = Time_solver('CN')
 
 
@@ -121,7 +124,8 @@ def test_error_convergence():
 	errorlist = []
 
 	for i in range(5):
-		solver = Monodomain_solver(manufactured_source, dt=dt)
+		solver = Monodomain_solver(dt=dt)
+		solver.set_source_term(manufactured_source)
 		method = Time_solver('CN')
 
 
@@ -159,8 +163,8 @@ def test_error_convergence():
 
 
 if __name__ == '__main__':
-	#test_consentration_conservation()
-	#test_constant_solution()
-	#test_manufactured_solution()
+	test_consentration_conservation()
+	test_constant_solution()
+	test_manufactured_solution()
 
 	test_error_convergence()

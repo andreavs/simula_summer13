@@ -27,8 +27,8 @@ class Monodomain_solver:
     f: callable object implementing f(v, t)
     dt: time step (assumed constant)
 	"""
-	def __init__(self,f,dim=2,dt=0.01):
-		self.f = f
+	def __init__(self,dim=2,dt=0.01):
+		#self.f = f
 		self.dt = dt
 		self.dim = dim
 		self.initial_condition_set = False
@@ -37,12 +37,13 @@ class Monodomain_solver:
 		self.geometry_set = False
 		self.M_set = False
 		self.form_set = False
+		self.source_term_set = False
 		self.step_counter = 0;
 		self.D = default_D
 		#self.b = PETScMatrix()
 		#self.c = PETScMatrix()
 
-	def set_geometry(self, mesh):
+	def set_geometry(self, mesh, space='Lagrange', order=1):
 		print 'setting geometry... ',
 		domain_type = [UnitIntervalMesh, UnitSquareMesh, UnitCubeMesh]
 		self.meshtype = mesh
@@ -50,7 +51,7 @@ class Monodomain_solver:
 
 			if len(mesh) == self.dim:
 				self.mesh = domain_type[self.dim-1](*mesh)
-				self.V = FunctionSpace(self.mesh, 'Lagrange', 1)
+				self.V = FunctionSpace(self.mesh, space, order)
 			else:
 				print 'dimension mismatch in set_geometry! mesh does not match dimension'
 				print str(self.dim)
@@ -60,8 +61,16 @@ class Monodomain_solver:
 		elif isinstance(mesh, str):
 			#interpreted as filename.. do something cool! 
 			print 'something cool'
+
+		else:
+			print "input not understood! Exiting..."
+			sys.exit(1)
 		self.geometry_set = True
 		print 'geometry set!'
+
+	def set_source_term(self, f):
+		self.f = f
+		self.source_term_set = True
 
 	def set_initial_condition(self, u0, t0=0):
 		if self.geometry_set:
@@ -88,7 +97,7 @@ class Monodomain_solver:
 			sys.exit()
 
 	def set_boundary_conditions(self):
-		print 'setting boundary conditions...'
+		print 'setting boundary conditions...',
 		self.boundary_conditions_set = True
 		print 'boundary conditions set!'
 		return 0
@@ -99,6 +108,7 @@ class Monodomain_solver:
 		self.M_set = True
 
 	def set_time_solver_method(self,method):
+		assert isinstance(method,Time_solver)
 		self.method = method
 		self.time_solver_method_set = True
 		print 'time scheme set!'
@@ -127,13 +137,17 @@ class Monodomain_solver:
 		elif isinstance(self.f, Goss_wrapper):
 			self.f.advance(self.u_n, time, dt)
 			#self.u_p.vector().set_local(new_u);
+		elif isinstance(self.f, list):
+			for i in range(len(self.f)):
+				self.f[i].advance(self.u_n,time,dt)
 		else:
 			print "something is wrong with f(v)!!"
 
 
 	def solve_for_time_step(self):
 		if self.time_solver_method_set and self.boundary_conditions_set \
-		and self.initial_condition_set and self.M_set and self.form_set:
+		and self.initial_condition_set and self.M_set and self.form_set \
+		and self.source_term_set:
 
 			print 'solving for time step ' + str(self.step_counter) + "... ", 
 			self.step_counter += 1
@@ -256,7 +270,7 @@ def default_D(v):
 
 
 if __name__ == '__main__':
-	solver = Monodomain_solver(default_f, dt=0.01)
+	solver = Monodomain_solver(dt=0.01)
 	method = Time_solver('CN')
 
 	x_nodes, y_nodes = 20, 20
@@ -264,7 +278,9 @@ if __name__ == '__main__':
 	solver.set_time_solver_method(method);
 	solver.set_initial_condition(gaussian_u0_2d());
 	solver.set_boundary_conditions();
-	solver.set_M(((1,0),(0,1)))
+	solver.set_source_term(default_f)
+	M = ((1,0),(0,1))
+	solver.set_M(M)
 	save = True
 	solver.solve(2, savenumpy=save)
 	savemovie = False

@@ -120,7 +120,8 @@ if __name__ == '__main__':
 	ode_solver.get_field_states(init_state)
 	
 	### Setting up FEniCS part: 
-	solver = Monodomain_solver(goss_wrap, dt=dt)
+	solver = Monodomain_solver(dt=dt)
+	solver.set_source_term(goss_wrap)
 	method = Time_solver(time_solution_method)
 	solver.set_geometry([x_nodes,y_nodes])
 	solver.set_time_solver_method(method);
