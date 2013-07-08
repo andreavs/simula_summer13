@@ -10,7 +10,7 @@ import os, sys
 from mayavi import mlab as ml
 import pylab as pl
 
-def numpyfy(u, mesh, d_nodes, space, dim=2):
+def numpyfy(u, mesh, d_nodes,mapping):
 	"""
 	Creates the good numpy jazz from FEniCS data, plotting ready!
 	u is the data
@@ -22,33 +22,24 @@ def numpyfy(u, mesh, d_nodes, space, dim=2):
 	general geometries are NOT supported (yet!)
 	"""
 	tempu = u.vector().array()
-	dum =  space.dofmap().vertex_to_dof_map(mesh)
+	dum =  mapping
 	#print dum
+	dim = len(d_nodes)
 	tempmesh = np.copy(mesh.coordinates())
 	for i in range(len(d_nodes)):
 		tempmesh[:,i] = np.round(tempmesh[:,i]*d_nodes[i])
 	#tempmesh = mesh.coordinates()*xnodes
-	Nx = d_nodes[0] + 1
-	Ny = d_nodes[1] + 1
-	x = tempmesh[0:Nx,0]
-	y = tempmesh[0:-1:Nx,1]
-	X,Y = np.meshgrid(x,y)
 	a = (np.array(d_nodes)+1).astype(int)
 
 	umesh = np.zeros(a, 'float')
-	print umesh.shape
-	coordinates = np.zeros(dim)
+	#coordinates = np.zeros(dim)
+	coordinates = tempmesh[dum[:][:]]
+	#umesh[coordinates.astype(int)] = tempu
 	for i in range(tempmesh.shape[0]):
-		index = dum[i]
-		coordinates = tempmesh[index]
-		xcoor = tempmesh[index][0]
-		ycoor = tempmesh[index][1]
-		#print coordinates.astype(int)
-		#print xcoor, ycoor
-		umesh[tuple(coordinates.astype(int))] = tempu[i]
+		umesh[tuple(coordinates[i].astype(int))] = tempu[i]
 
 
-	return umesh, X,Y
+	return umesh
 
 
 def mcrtmv(frames, dt,Lx,Ly,Nx,Ny,savemovie=False, mvname='test', vmin=-1, vmax=1):

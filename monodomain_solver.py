@@ -65,6 +65,7 @@ class Monodomain_solver:
 		else:
 			print "input not understood! Exiting..."
 			sys.exit(1)
+		self.vertex_to_dof_map = self.V.dofmap().vertex_to_dof_map(self.V.mesh())
 		self.geometry_set = True
 		print 'geometry set!'
 
@@ -202,7 +203,8 @@ class Monodomain_solver:
 			self.t.append(time)
 			if savenumpy:
 				#print str(self.meshtype[0])
-				usave, X,Y = numpyfy(u_n, self.mesh, self.meshtype, self.V)
+				usave = numpyfy(u_n, self.mesh, self.meshtype, self.vertex_to_dof_map)
+				#usave = u_n.vector().array()
 				filename = 'solution_%06d.npy' % self.step_counter
 				np.save(filename, usave)
 			if plot_realtime:

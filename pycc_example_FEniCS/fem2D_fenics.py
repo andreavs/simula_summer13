@@ -118,10 +118,10 @@ def advance1(self, u, t, dt):
 
 if __name__ == '__main__':
 	### simulation parameters:
-	dt = 0.1
-	T = 500
+	dt = 1
+	T = 50
 	n = 100;
-	FEniCS_time_solver_method = 'CN'
+	FEniCS_time_solver_method = 'BE'
 	method = Time_solver(FEniCS_time_solver_method)
 
 	solver = Monodomain_solver(dt=dt)
@@ -220,7 +220,7 @@ if __name__ == '__main__':
 	save = True
 	savemovie = True
 	solver.solve(T, savenumpy=save)
-	if save:
+	if not save:
 		mcrtmv(int(solver.n_steps), 0.01,1.0,1.0,n+1,n+1, \
 			savemovie=savemovie, mvname='test', vmin=-85, vmax=10)
 
