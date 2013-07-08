@@ -4,6 +4,8 @@ sys.path.insert(0,parentdir)
 from monodomain_solver import *
 import nose.tools as nt
 
+## to run write nosetests -a '!skip'
+
 TestFunction.skip = 1
 TestFunctions.skip = 1
 
@@ -105,7 +107,7 @@ def test_manufactured_solution():
 			savemovie=savemovie, mvname='test', vmin=0, vmax=3)
 
 	### test criterion
-	delta = 0.01	
+	delta = 0.1	
 	nt.assert_almost_equal(test, 0, delta=delta)
 
 def test_error_convergence():

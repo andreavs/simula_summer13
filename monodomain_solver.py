@@ -20,19 +20,24 @@ class Monodomain_solver:
 	self-set methods. Where D is a (possibly non-constant) diffusion factor, 
 	M is an anisotrophy tensor and f is a source term
 
+	the operator splitting is 2nd order in time, and so is the native time evolution 
+	of the ODE term. 
+
 	Class attributes:
 	t: array of time values
     u: array of solution values (at time points t)
     k: step number of the most recently computed solution
     f: callable object implementing f(v, t)
     dt: time step (assumed constant)
+    ...and many more!
 	"""
 	def __init__(self,dim=2,dt=0.01):
 		#self.f = f
 		self.dt = dt
 		self.dim = dim
 		self.initial_condition_set = False
-		self.boundary_conditions_set = False
+		self.set_boundary_conditions()
+		print "setting default von Neumann boundary conditions... (nothing else is implemented)"
 		self.time_solver_method_set = False 
 		self.geometry_set = False
 		self.M_set = False
@@ -40,8 +45,7 @@ class Monodomain_solver:
 		self.source_term_set = False
 		self.step_counter = 0;
 		self.D = default_D
-		#self.b = PETScMatrix()
-		#self.c = PETScMatrix()
+
 
 	def set_geometry(self, mesh, space='Lagrange', order=1):
 		print 'setting geometry... ',
@@ -134,7 +138,8 @@ class Monodomain_solver:
 			mid_u = np.copy(u_p + (dt/2.)*self.f(u_p, self.mesh, self.V, time))
 			new_u = np.copy(u_p + (dt)*self.f(mid_u, self.mesh, self.V, time))
 			self.u_n.vector().set_local(new_u)
- 
+			self.u_n.vector().apply("insert")
+			
 		elif isinstance(self.f, Goss_wrapper):
 			self.f.advance(self.u_n, time, dt)
 			#self.u_p.vector().set_local(new_u);
@@ -146,18 +151,23 @@ class Monodomain_solver:
 
 
 	def solve_for_time_step(self):
+		info("JADA")
 		if self.time_solver_method_set and self.boundary_conditions_set \
 		and self.initial_condition_set and self.M_set and self.form_set \
 		and self.source_term_set:
 
-			print 'solving for time step ' + str(self.step_counter) + "... ", 
+			info('solving for time step ' + str(self.step_counter) + "... ") 
 			self.step_counter += 1
 			theta = 0.5
 			dt = theta*self.dt
+			info("solving for source term...")
 			self.source_term_solve_for_time_step(dt) # does the half time step for the ODE part
+			info("source term done!")
 			dt = self.dt
 			self.u_p.assign(self.u_n)
+			info("so far so good, starting the FEniCS solver....")
 			solve(self.a == self.L, self.u_n)
+			print "FEniCS solver done!"
 			#print self.u_n.vector().array().sum()
 			self.u_p.assign(self.u_n)
 
@@ -175,7 +185,7 @@ class Monodomain_solver:
 			print self.u_n.vector().array().sum()
 			self.u_p.assign(self.u_n)
 			'''
-			return self.u_n
+			#return self.u_n
 
 		else:
 			print 'System not initialized!'
@@ -185,32 +195,22 @@ class Monodomain_solver:
 		time = self.t[0]
 		self.n_steps = int(T/self.dt)
 		self.set_form()
-		# theta = self.method.theta
-		# Dt_u_k_n = (self.u-self.u_p)
-		# u_mid = theta*self.u + (1-theta)*self.u_p
-		# dt = Constant(self.dt)
-
-		# form = (Dt_u_k_n*self.v + dt*inner(self.M*nabla_grad(u_mid), nabla_grad(self.v)))*dx
-		# self.form_set = True
-		# (self.a, self.L) = system(form)
-
-		#self.A = assemble(self.a)
 		while time<T:
-			u_n = self.solve_for_time_step()
+			self.solve_for_time_step()
 			print 'out of ' + str(self.n_steps) + '. time=' + str(time)
 
 			time+=self.dt
 			self.t.append(time)
 			if savenumpy:
-				#print str(self.meshtype[0])
-				usave = numpyfy(u_n, self.mesh, self.meshtype, self.vertex_to_dof_map)
-				#usave = u_n.vector().array()
+				usave = self.u_n.vector().array() #numpyfy(u_n, self.mesh, self.meshtype, self.vertex_to_dof_map)
 				filename = 'solution_%06d.npy' % self.step_counter
 				np.save(filename, usave)
 			if plot_realtime:
-				plot(self.u_p, wireframe=True)
+				plot(self.u_p, wireframe=False, rescale=False, tile_windows=True)
 
 ### end of class monodomain_solver ###
+
+
 
 class Time_solver:
 	"""
@@ -282,12 +282,15 @@ if __name__ == '__main__':
 	solver.set_boundary_conditions();
 	solver.set_source_term(default_f)
 	M = ((1,0),(0,1))
+	print "setting M..."
 	solver.set_M(M)
-	save = True
-	solver.solve(2, savenumpy=save)
+	print "M set!"
+	save = False
+	print "starting solver!!!!"
+	solver.solve(3.0, savenumpy=save, plot_realtime=True)
 	savemovie = False
 	if save:
-		mcrtmv(int(solver.n_steps), 0.01,1.0,1.0,x_nodes+1,y_nodes+1, \
+		mcrtmv(int(solver.n_steps), 0.01, solver.mesh, [x_nodes,y_nodes], solver.vertex_to_dof_map, \
 			savemovie=savemovie, mvname='test', vmin=0, vmax=1)
 
 	print 'default run finished'

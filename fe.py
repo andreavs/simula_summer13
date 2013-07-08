@@ -83,10 +83,10 @@ if __name__ == '__main__':
 	x_nodes, y_nodes = 49, 49 ## no. of nodes in each dir
 	N = (x_nodes+1)*(y_nodes+1)
 	T = 100
-	dt = 0.1
+	dt = 0.5
 	t = 0
 	time_steps = int((T-t)/dt)
-	time_solution_method = 'CN' ### crank nico
+	time_solution_method = 'BE' ### crank nico
 
 	save = True #save solutions as txt files
 	savemovie = False #create movie from results. Takes time! 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
 	solver = ThetaSolver()
 	ode_solver = ODESystemSolver(int(N), solver, ode)
-	
+	#ode_solver.set_num_threads(3)
 	### put the ode solver inside wrapper
 	goss_wrap = Goss_wrapper(ode_solver, advance, space)
 
@@ -140,9 +140,15 @@ if __name__ == '__main__':
 	solver.solve(T, savenumpy=save)
 
 	if save:
-		mcrtmv(int(time_steps), 0.01,1.0,1.0,x_nodes+1,y_nodes+1, \
-			savemovie=savemovie, mvname='test', vmin = -80, vmax = 10)
-	
+		mcrtmv(int(solver.n_steps), \
+			0.01, \
+			solver.mesh, \
+			[x_nodes,y_nodes], \
+			solver.vertex_to_dof_map, \
+			savemovie=savemovie, \
+			mvname='test', \
+			vmin=-80, \
+			vmax=10)
 	
 
 

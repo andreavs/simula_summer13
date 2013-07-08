@@ -9,4 +9,4 @@ parameters(a = 1.)
 
 
 # Time derivatives
-dv_dt = -v
+dv_dt = -a*v

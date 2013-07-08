@@ -21,7 +21,7 @@ def numpyfy(u, mesh, d_nodes,mapping):
 
 	general geometries are NOT supported (yet!)
 	"""
-	tempu = u.vector().array()
+	tempu = u#.vector().array()
 	dum =  mapping
 	#print dum
 	dim = len(d_nodes)
@@ -42,14 +42,12 @@ def numpyfy(u, mesh, d_nodes,mapping):
 	return umesh
 
 
-def mcrtmv(frames, dt,Lx,Ly,Nx,Ny,savemovie=False, mvname='test', vmin=-1, vmax=1):
+def mcrtmv(frames, dt,mesh, d_nodes, map, savemovie=False, mvname='test', vmin=-1, vmax=1):
 	"""
 	Creates move from numpyfied results in 2d, using mencoder. Prolly does not work on mac!
 	"""
 
-	x = np.linspace(0,Lx,Nx);
-	y = np.linspace(0,Lx,Nx);
-	X,Y = np.meshgrid(x,y);
+
 	size = 500,500
 	
 	fig = ml.figure(size= size, bgcolor=(1.,1.,1.));
@@ -57,18 +55,21 @@ def mcrtmv(frames, dt,Lx,Ly,Nx,Ny,savemovie=False, mvname='test', vmin=-1, vmax=
 	#fig.scene.anti_aliasing_frames=07
 
 	#extent = [0,Nx-1,0,Ny-1,-30,30]
-	
+	xaxis = np.linspace(0,1,d_nodes[0]+1)
+	yaxis = np.linspace(0,1,d_nodes[1]+1)
 	ml.clf(figure=fig)
 	u = np.load('solution_%06d.npy'%1);
+	u = numpyfy(u, mesh, d_nodes, map)
 	fname = '_tmp%07d.png' % 1
-	s = ml.imshow(x,y,u,figure=fig,vmin=vmin, vmax=vmax)
+	s = ml.imshow(xaxis, yaxis, u,figure=fig,vmin=vmin, vmax=vmax)
 	#scale = 1./np.max(np.abs(u))
 	u = u
-	ml.axes(extent=[0,Lx,0,Ly,0,2])
+	ml.axes(extent=[0,1,0,1,0,2])
 	ml.colorbar()
 	ml.xlabel('x position')
 	ml.ylabel('y position')
 	ml.zlabel('wave amplitude')
+
 	if savemovie == True:
 		pl.ion()
 		arr = ml.screenshot()
@@ -78,6 +79,7 @@ def mcrtmv(frames, dt,Lx,Ly,Nx,Ny,savemovie=False, mvname='test', vmin=-1, vmax=
 	for i in range(2,frames):
 
 		u = np.load('solution_%06d.npy'%i);
+		u = numpyfy(u, mesh, d_nodes, map)
 		s.mlab_source.scalars = u
 		fname = '_tmp%07d.png' % i
 		if savemovie == True:
