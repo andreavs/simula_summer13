@@ -127,9 +127,7 @@ if __name__ == '__main__':
 	solver = Monodomain_solver(dt=dt)
 	solver.set_geometry([n,n])
 	mesh = solver.mesh
-
 	print mesh.num_vertices()
-
 	#print mesh.order()
 
 
@@ -217,9 +215,9 @@ if __name__ == '__main__':
 	solver.set_initial_condition(V_FEniCS_ordered)
 
 
-	save = True
-	savemovie = True
-	solver.solve(T, savenumpy=save)
+	save = False
+	savemovie = False
+	solver.solve(T, savenumpy=save, plot_realtime=True)
 	if not save:
 		mcrtmv(int(solver.n_steps), 0.01,1.0,1.0,n+1,n+1, \
 			savemovie=savemovie, mvname='test', vmin=-85, vmax=10)

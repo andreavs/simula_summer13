@@ -63,8 +63,14 @@ class Monodomain_solver:
 				sys.exit()
 
 		elif isinstance(mesh, str):
-			#interpreted as filename.. do something cool! 
-			print 'something cool'
+			print 'interpreting mesh input as filename...'
+			try:
+				self.mesh = Mesh(mesh)
+				self.V = FunctionSpace(self.mesh, space, order)
+			except IOError: 
+				print "Could not find the file spesified, exiting...."
+				sys.exit(1)
+			
 
 		else:
 			print "input not understood! Exiting..."
@@ -82,8 +88,12 @@ class Monodomain_solver:
 			print 'setting initial conditions... ',
 			if isinstance(u0, np.ndarray):
 				print "initial condition as array, assuming sorted properly... ",
+
 				self.u_p = project(Expression('exp(x[0])'), self.V)
+				print self.u_p.vector().array().shape, u0.shape
+				
 				self.u_p.vector().set_local(u0)
+				self.u_p.vector().apply("insert")
 			else:
 				# self.u = []
 				# self.u.append(u0)
@@ -174,17 +184,6 @@ class Monodomain_solver:
 			dt = theta*self.dt
 			self.source_term_solve_for_time_step(dt) # does the final time step for the ODE part
 			self.u_p.assign(self.u_n)
-
-
-
-			'''
-			self.source_term_solve_for_time_step(self.dt) # does the time step for the ODE part
-			
-			self.u_p.assign(self.u_n)
-			solve(self.a == self.L, self.u_n)
-			print self.u_n.vector().array().sum()
-			self.u_p.assign(self.u_n)
-			'''
 			#return self.u_n
 
 		else:
@@ -206,7 +205,7 @@ class Monodomain_solver:
 				filename = 'solution_%06d.npy' % self.step_counter
 				np.save(filename, usave)
 			if plot_realtime:
-				plot(self.u_p, wireframe=False, rescale=False, tile_windows=True)
+				plot(self.u_p, wireframe=False, rescale=False, tile_windows=True)#, mode = "color")
 
 ### end of class monodomain_solver ###
 

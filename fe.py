@@ -29,7 +29,7 @@ def make_parameter_field(coor, ode, **parameters):
 		m = coor.shape[0]
 	
     P = np.zeros((m,nop))
-
+    a
     # set default values in case they are not sent in
     for i in range(nop):
 		P[:,i] = ode.get_parameter(parameter_names[i])
@@ -62,6 +62,7 @@ def advance(self, u, t, dt):
 	goss_solver = self.goss_solver
 	dof_temp_values = u.vector().array()
 	self.vertex_temp_values[self.vertex_to_dof_map] = dof_temp_values
+	print self.vertex_temp_values.shape, dof_temp_values.shape
 	goss_solver.set_field_states(self.vertex_temp_values)
 	#print "before forward:", self.vertex_temp_values[ind_stim]
 	#print "before forward NOSTIM:", self.vertex_temp_values[1-ind_stim]
@@ -88,18 +89,20 @@ if __name__ == '__main__':
 	time_steps = int((T-t)/dt)
 	time_solution_method = 'BE' ### crank nico
 
-	save = True #save solutions as txt files
+	save = False #save solutions as binary
 	savemovie = False #create movie from results. Takes time! 
+	plot_realtime = True
 
 	# small hack
 	mesh = UnitSquareMesh(x_nodes, y_nodes) 
 	space = FunctionSpace(mesh, 'Lagrange', 1)
-
 	### Setting up Goss/Gotran part
 	ode = jit(load_ode("myocyte.ode"))
 	vertex_to_dof_map =  space.dofmap().vertex_to_dof_map(mesh)
+	N_thread = mesh.coordinates().shape[0]
+	print vertex_to_dof_map.shape, mesh.coordinates().shape
 	   
-	ist = np.zeros(len(vertex_to_dof_map), dtype=np.float_) 
+	ist = np.zeros(N_thread, dtype=np.float_) 
 	ist = stimulation_domain(mesh.coordinates(), amp= -10)
 
 	P0 = make_parameter_field(mesh.coordinates(), ode)
@@ -110,13 +113,15 @@ if __name__ == '__main__':
 	print "P1", P1[ind_stim,1]
 
 	solver = ThetaSolver()
-	ode_solver = ODESystemSolver(int(N), solver, ode)
+	ode_solver = ODESystemSolver(int(N_thread), solver, ode)
 	#ode_solver.set_num_threads(3)
 	### put the ode solver inside wrapper
 	goss_wrap = Goss_wrapper(ode_solver, advance, space)
 
 	#dump(ist.reshape(n,n), "ist", mn = -1, mx = 2)
-	init_state = np.zeros(N) # The solution vector
+	init_state = np.zeros(N_thread) # The solution vector
+	#print mesh.coordinates().shape
+	#asdkaspodkasp
 	ode_solver.get_field_states(init_state)
 	
 	### Setting up FEniCS part: 
@@ -137,7 +142,7 @@ if __name__ == '__main__':
 	M11 = Constant('1e-4')
 	solver.set_M(((M00, M01),(M10,M11))) # isotropic
 
-	solver.solve(T, savenumpy=save)
+	solver.solve(T, savenumpy=save, plot_realtime=plot_realtime)
 
 	if save:
 		mcrtmv(int(solver.n_steps), \
