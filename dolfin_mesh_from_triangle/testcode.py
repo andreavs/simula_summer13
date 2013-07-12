@@ -55,7 +55,14 @@ M = ((p,0.0),(0.0,p))
 
 
 
+M = as_tensor(M)
 
+p = M[0,0]
+
+plot(p)
+interactive()
+
+dshfosdd
 ### the rest is just constructing a sample problem: 
 
 def myf(v, mesh, space, time):
