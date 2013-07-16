@@ -21,7 +21,7 @@ def plot_tree(N, adj, dist, terminals):
 	sm._A = []
 	plt.colorbar(sm)
 	'''
-
+	counter = 1
 	for i in xrange(np.shape(adj)[0] ):
 		nodes = np.argwhere(adj[i,:])
 		for j in xrange(len(nodes)):

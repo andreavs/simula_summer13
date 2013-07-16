@@ -205,7 +205,7 @@ class Monodomain_solver:
 				filename = 'solution_%06d.npy' % self.step_counter
 				np.save(filename, usave)
 			if plot_realtime:
-				plot(self.u_p, wireframe=False, rescale=False, tile_windows=True)#, mode = "color")
+				plot(self.u_p, wireframe=False, rescale=True, tile_windows=True)#, mode = "color")
 
 ### end of class monodomain_solver ###
 

@@ -56,3 +56,5 @@ def get_tree(E,N,surface, C):
 		#print Q
 	#adj = np.linalg.sparse(adj)
 	return adj, distance, terminal
+
+	
