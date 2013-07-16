@@ -3,7 +3,6 @@
 *.txt
 *.dat
 *.png
-*.mpg
 *.npy
 *.vtu
 *.pvtu

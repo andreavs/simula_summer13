@@ -1,0 +1,12 @@
+# simple test model
+
+# States with default initial conditions
+states(v=[2])
+
+# Parameters with default values
+parameters(a = 1.)
+
+
+
+# Time derivatives
+dv_dt = -a*v
