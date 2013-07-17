@@ -70,7 +70,10 @@ class Monodomain_solver:
 			except IOError: 
 				print "Could not find the file spesified, exiting...."
 				sys.exit(1)
-			
+
+		elif isinstance(mesh,Mesh):
+			self.mesh = Mesh(mesh)
+			self.V = FunctionSpace(self.mesh, space, order)
 
 		else:
 			print "input not understood! Exiting..."
@@ -161,7 +164,6 @@ class Monodomain_solver:
 
 
 	def solve_for_time_step(self):
-		info("JADA")
 		if self.time_solver_method_set and self.boundary_conditions_set \
 		and self.initial_condition_set and self.M_set and self.form_set \
 		and self.source_term_set:
@@ -176,7 +178,8 @@ class Monodomain_solver:
 			dt = self.dt
 			self.u_p.assign(self.u_n)
 			info("so far so good, starting the FEniCS solver....")
-			solve(self.a == self.L, self.u_n)
+			solve(self.a == self.L, self.u_n, solver_parameters={"linear_solver": "gmres"}, \
+      			form_compiler_parameters={"optimize": True})
 			print "FEniCS solver done!"
 			#print self.u_n.vector().array().sum()
 			self.u_p.assign(self.u_n)
@@ -188,6 +191,7 @@ class Monodomain_solver:
 
 		else:
 			print 'System not initialized!'
+			sys.exit(1)
 
 
 	def solve(self, T, savenumpy=False, plot_realtime=False):
@@ -205,7 +209,14 @@ class Monodomain_solver:
 				filename = 'solution_%06d.npy' % self.step_counter
 				np.save(filename, usave)
 			if plot_realtime:
-				plot(self.u_p, wireframe=False, rescale=True, tile_windows=True)#, mode = "color")
+				if self.dim == 2:
+					rescale = True
+					mode = 'color'
+				else:
+					rescale = True
+					mode = 'auto'
+
+				plot(self.u_p, wireframe=False, rescale=rescale, tile_windows=True, mode = mode)
 
 ### end of class monodomain_solver ###
 
@@ -247,8 +258,9 @@ class Goss_wrapper:
 		self.advance = types.MethodType(advance, self, Goss_wrapper)
 		self.goss_solver = goss_solver
 		self.vertex_to_dof_map = space.dofmap().vertex_to_dof_map(space.mesh())
-		self.vertex_temp_values = np.zeros(space.mesh().num_vertices(), dtype=np.float_)
-		
+		self.vertex_temp_values = np.zeros(space.mesh().coordinates().shape[0], dtype=np.float_)
+		# print self.vertex_temp_values.shape, self.vertex_to_dof_map.shape, max(self.vertex_to_dof_map)
+		# sys.exit(1)
 
 def default_f(v, mesh, space, time): 
 	"""

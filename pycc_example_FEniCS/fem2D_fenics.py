@@ -2,7 +2,6 @@ import os,sys
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0,parentdir) 
 from monodomain_solver import *
-import nose.tools as nt
 
 import numpy as np
 from scipy import sparse
@@ -218,7 +217,7 @@ if __name__ == '__main__':
 	save = False
 	savemovie = False
 	solver.solve(T, savenumpy=save, plot_realtime=True)
-	if not save:
+	if save:
 		mcrtmv(int(solver.n_steps), 0.01,1.0,1.0,n+1,n+1, \
 			savemovie=savemovie, mvname='test', vmin=-85, vmax=10)
 
