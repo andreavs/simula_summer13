@@ -60,29 +60,22 @@ def advance(self, u, t, dt):
 	assert(isinstance(u, Function))
 	goss_solver = self.goss_solver
 	dof_temp_values = u.vector().array()
+	goss_solver.get_field_states(self.vertex_temp_values)
 	self.vertex_temp_values[self.vertex_to_dof_map] = dof_temp_values
-	print self.vertex_temp_values.shape, dof_temp_values.shape
 	goss_solver.set_field_states(self.vertex_temp_values)
-	#print "before forward:", self.vertex_temp_values[ind_stim]
-	#print "before forward NOSTIM:", self.vertex_temp_values[1-ind_stim]
+
+
 	if t<5:
 		goss_solver.set_field_parameters(P1)
 	else:
 		goss_solver.set_field_parameters(P0)
-    
+
 	goss_solver.forward(t, dt)
-	
+
 	goss_solver.get_field_states(self.vertex_temp_values)
-
 	dof_temp_values[:] = self.vertex_temp_values[self.vertex_to_dof_map]
-	print u.vector().array().shape, dof_temp_values.shape
-
-	# if MPI.process_number() == 0:
-	# 	for i in range(len(dof_temp_values)):
-	# 		print u.vector().array()[i], dof_temp_values[i], MPI.process_number()
 	u.vector().set_local(dof_temp_values)
 	u.vector().apply('insert')
-	#u.vector()[:] = dof_temp_values
 	return u
 
 if __name__ == '__main__':
@@ -118,7 +111,7 @@ if __name__ == '__main__':
 	print "P0", P0[P0[:,1]!=0.,1]
 	print "P1", P1[ind_stim,1]
 
-	solver = ThetaSolver()
+	solver = ImplicitEuler()
 	ode_solver = ODESystemSolver(int(N_thread), solver, ode)
 	#ode_solver.set_num_threads(3)
 	### put the ode solver inside wrapper

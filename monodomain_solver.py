@@ -187,6 +187,7 @@ class Monodomain_solver:
 			dt = theta*self.dt
 			self.source_term_solve_for_time_step(dt) # does the final time step for the ODE part
 			self.u_p.assign(self.u_n)
+			self.u_p.vector().apply("insert")
 			#return self.u_n
 
 		else:

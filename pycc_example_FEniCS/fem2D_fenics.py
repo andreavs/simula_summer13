@@ -3,6 +3,7 @@ parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0,parentdir) 
 from monodomain_solver import *
 
+
 import numpy as np
 from scipy import sparse
 import Image
