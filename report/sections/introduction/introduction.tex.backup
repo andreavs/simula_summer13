@@ -1,0 +1,80 @@
+\section{Introduction and theory}
+This section will give a quick introduction to the problem we are looking to solve, and explain where the code produced will fit in a network of other packages. 
+
+\subsection{Electrical activity in the heart}
+The heart beats as a result of electrical impulses produced by the heart cells themselves. This causes the intracellular electrical potential to increase, and this potential difference between the intracellular and the extracellular potential then spreads out like a diffusion process. It is useful to start off with some notation. 
+\begin{align*}
+ u_i & \text{ denotes the intracellular heart potential} \\
+ u_e & \text{ denotes the extracellular heart potential}\\
+ u_o & \text{ denotes the potential outside the heart (sometimes $u_T$ is also used)} \\
+ v & = u_i-u_e \\
+ H & \text{ denotes the heart domain} \\
+ \partial H & \text{ denotes the heart domain boundary (where the heart connects to the torso)} \\
+ T & \text{ denotes the torso domain (outside the heart)} \\ 
+ \partial T & \text{ denotes the torso domain boundary (where the torso connects to the surroundings)} \\ 
+\end{align*}
+More will be introduced underway, but at the end these will be the most important ones. We will now go through a very brief derivation of the heart equations. 
+
+\subsubsection{Warm-up: equations for the torso}
+We start with the spread of electrical potential in the torso. Assuming quasi-static conditions, we have from Maxwells equations that 
+\begin{equation}
+ \nabla \times E = 0,
+\end{equation}
+which means that for some scalar potential $u$, we have 
+\begin{equation}
+ E = -\nabla u
+\end{equation}
+The current is then given by the relation 
+\begin{equation}
+ J = ME
+\end{equation}
+where $M$ is the conductivity (this might be a tensor). This, of course, gives 
+\begin{equation}
+ J = -M\nabla u
+\end{equation}
+If we assume that there is no sources or sinks for the potential inside the medium, and no build-up of charge, then for a small subvolume $V$ with surface $S$, we have 
+\begin{equation}
+ \int_S n\cdot J \, dS = 0
+\end{equation}
+and so from the convergence theorem 
+\begin{equation}
+ -\int_V \nabla \cdot J \, dV = 0
+\end{equation}
+and since this is independent of the chosen domain, we have 
+\begin{equation}
+ \nabla \cdot J = 0, 
+\end{equation}
+and this means that 
+\begin{equation}
+ \nabla \cdot (M \nabla u) = 0
+\end{equation}
+What we have derived so far is just the standard heat equation. The torso should have the same potential on the boundary as the heart to ensure continuity of the potential, and if the torso is surrounded by air there should be no current flowing out of the body. The equations describing the torso is then
+\begin{align}
+ \nabla \cdot (M_T \nabla u) = 0 & x \in T, \\
+ n \cdot M_T \nabla u_t = 0 & x \in \partial T, \\
+ u_T = u_{\partial H} x \in \partial H. 
+\end{align}
+
+\subsubsection{Exitable tissue}
+The heart cells are called excitable, which means they can respond to an electrical stimulus. This ability enables an electric stimulation of one part of the heart to propagate through the muscle and activate the complete heart. This process happens through a depolarization: when the cells are at rest, there is a potential difference across the cell membrane. The stimulation causes the potential difference to go to zero or even further. This is a very fast process, and is followed by a slower repolarization that restores the difference. This is not handled by us at all, so I will skip the detailed on this, and just note that this creates a time dependent source term, and the equations describing this are
+\begin{align}
+ \nabla \cdot (M_i \nabla (u_e + v)) = \chi C_m {\partial v \over \partial t} + \chi I_{ion} \\
+ \nabla \cdot (M_i \nabla v) + \nabla \cdot ((M_i + M_e)\nabla u) = 0
+\end{align}
+where $\chi$ represents the area of cell surface per cell volume, and $C_m$ is the capacitance of the cell membrane. 
+
+
+\subsection{Bringing it all together}
+We have shown some of the relations that make out the heart equations. The complete system, in normalized units, is described by 
+\begin{align}
+ {\partial s \over \partial t} &= f(s,v,t) & x \in H \\
+ \nabla \cdot (M_i \nabla v) + \nabla \cdot (M_i \partial u_e) &= {\partial v \over \partial t} + I_{ion}(v,s) & x \in H \\
+ \nabla \cdot (M_i \nabla v) + \nabla((M_i + M_e) \nabla u_e) & = 0 & x \in H \\
+ \nabla \cdot (M_o \nabla u_o) &= 0 & x\in T \\
+ u_e &= u_o & x \in \partial H \\ 
+ n \cdot (M_i \nabla v + (M_i + M_e)) &= n\cdot (M_o \nabla u_o) & x \in \partial H \\
+ n \cdot (M_i \partial v + M_i \nabla u_e) & = 0 & x \in \partial H \\
+ n \cdot M_o \nabla u_o & = 0 & x\in \partial T 
+\end{align}
+
+

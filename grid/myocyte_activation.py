@@ -27,7 +27,7 @@ def make_parameter_field(coor, ode, **parameters):
     nop = len(parameter_names)
     if isinstance(coor, (int, float)):
 		m = coor
-		print " Only the number of coordinates are given, not the actual coordinates.\n That is OK as long as there are no function to evalute in the parameters list."
+		print " Only the number of coordinates are given, not the actual meshes/reference_finer_finer.xmlcoordinates.\n That is OK as long as there are no function to evalute in the parameters list."
     else:
 		m = coor.shape[0]
 	
@@ -71,22 +71,15 @@ def advance(self, u, t, dt):
 	ist = np.zeros(np.size(p))
 	ist[idx]  = -15
 
-	P = make_parameter_field(mesh.coordinates(), ode, ist=ist)
-
-
+	P = make_parameter_field(fenics_ordered_coordinates, ode, ist=ist)
 	goss_solver.set_field_parameters(P)
-	goss_solver = self.goss_solver
+
 	dof_temp_values = u.vector().array()
-	goss_solver.get_field_states(self.vertex_temp_values)
-	self.vertex_temp_values[self.vertex_to_dof_map] = dof_temp_values
-	goss_solver.set_field_states(self.vertex_temp_values)
+	goss_solver.set_field_states(dof_temp_values)
     
 	goss_solver.forward(t, dt)
 	
-	goss_solver.get_field_states(self.vertex_temp_values)
-
-	goss_solver.get_field_states(self.vertex_temp_values)
-	dof_temp_values[:] = self.vertex_temp_values[self.vertex_to_dof_map]
+	goss_solver.get_field_states(dof_temp_values)
 	u.vector().set_local(dof_temp_values)
 	u.vector().apply('insert')
 	return u
@@ -128,7 +121,7 @@ def find_leaf_nodes(mesh,radius=0.3, ratio_of_nodes = 0.3):
 	ratio of nodes is the amount of nodes you want, divided by the number of nodes 
 		found by the purkinje simulation. 
 	"""
-	marks_vector = np.zeros(mesh.coordinates().shape[0])
+	marks_vector = np.zeros(fenics_ordered_coordinates.shape[0])
 	E, N, left, distance_lv, terminal_lv = call_tree.get_left()
 	E, N, right, distance_rv, terminal_rv = call_tree.get_right()
 
@@ -144,6 +137,8 @@ def find_leaf_nodes(mesh,radius=0.3, ratio_of_nodes = 0.3):
 	
 	r = radius #some radius
 	rr = r**2
+
+	C = fenics_ordered_coordinates # short hand 
 
 	#left ventricle:
 	terminal_idx = np.argwhere(terminal_lv)
@@ -180,23 +175,25 @@ if __name__ == '__main__':
 
 	# Set up the solver
 	solver = Monodomain_solver(dim=3, dt=dt)
-	method = Time_solver('BE')
-	mesh = Mesh('meshes/reference_finer.xml')
+	method = Time_solver('CN')
+	mesh = Mesh('meshes/reference.xml')
 	solver.set_geometry(mesh)
 	solver.set_time_solver_method(method)
 	solver.set_M(get_tensor())
 
 	V = solver.V
-	C = mesh.coordinates()
 
 
+
+	
+	vertex_to_dof_map =  V.dofmap().vertex_to_dof_map(mesh)
+	fenics_ordered_coordinates = mesh.coordinates()[vertex_to_dof_map]
+	N_thread = fenics_ordered_coordinates.shape[0]
 	p = find_leaf_nodes(mesh) ### p now contains the distances to the leaf nodes
 	ode = jit(load_ode("myocyte.ode"))
-	vertex_to_dof_map =  V.dofmap().vertex_to_dof_map(mesh)
-	N_thread = mesh.coordinates().shape[0]
 
 
-	solvermethod = ImplicitEuler()
+	solvermethod = GRL2()
 	ode_solver = ODESystemSolver(int(N_thread), solvermethod, ode)
 	goss_wrap = Goss_wrapper(ode_solver, advance, V)
 	solver.set_source_term(goss_wrap)
@@ -204,7 +201,7 @@ if __name__ == '__main__':
 	ode_solver.get_field_states(init_state)
 
 	### Setting up FEniCS part: 
-	fenics_ordered_init_state = init_state[vertex_to_dof_map]
+	fenics_ordered_init_state = init_state
 	solver.set_initial_condition(fenics_ordered_init_state);
 	solver.set_boundary_conditions();
 

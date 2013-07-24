@@ -1,0 +1,91 @@
+% $ biblatex auxiliary file $
+% $ biblatex version 1.7 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\entry{FEniCS}{online}{}
+  \field{sortinit}{F}
+  \field{title}{{FEniCS home page}}
+  \verb{url}
+  \verb www.fenicsproject.org
+  \endverb
+  \field{month}{07}
+  \field{year}{2013}
+\endentry
+
+\entry{goss}{online}{}
+  \field{sortinit}{G}
+  \field{title}{{goss repository}}
+  \verb{url}
+  \verb https://bitbucket.org/johanhake/goss
+  \endverb
+  \field{month}{07}
+  \field{year}{2013}
+\endentry
+
+\entry{gotran}{online}{}
+  \field{sortinit}{G}
+  \field{title}{{gotran repository}}
+  \verb{url}
+  \verb https://bitbucket.org/johanhake/gotran
+  \endverb
+  \field{month}{07}
+  \field{year}{2013}
+\endentry
+
+\entry{source}{online}{}
+  \field{sortinit}{S}
+  \field{title}{{source code repository}}
+  \verb{url}
+  \verb https://github.com/andreavs/simula_summer13
+  \endverb
+  \field{month}{07}
+  \field{year}{2013}
+\endentry
+
+\entry{Sundnes06}{book}{}
+  \true{moreauthor}
+  \name{author}{1}{}{%
+    {{}%
+     {Sundnes}{S.}%
+     {Joakim}{J.}%
+     {}{}%
+     {}{}}%
+  }
+  \true{moreeditor}
+  \name{editor}{1}{}{%
+    {{}%
+     {Barth}{B.}%
+     {T.~J.}{T.~J.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {Springer}%
+  }
+  \strng{namehash}{SJ+1}
+  \strng{fullhash}{SJ+1}
+  \field{sortinit}{S}
+  \field{booktitle}{{Computing the Electrical Activity in the Heart}}
+  \field{isbn}{978-3-642-07005-1}
+  \field{title}{{Computing the Electrical Activity in the Heart}}
+  \field{year}{2006}
+\endentry
+
+\lossort
+\endlossort
+
+\endinput

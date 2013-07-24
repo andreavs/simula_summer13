@@ -1,4 +1,5 @@
 from monodomain_solver import Monodomain_solver, Time_solver, Goss_wrapper
+from extracellular_solver import Extracellular_solver
 from dolfin_animation_tools import numpyfy, mcrtmv
 import numpy as np
 import pylab
@@ -143,8 +144,21 @@ if __name__ == '__main__':
 	M01 = Constant('0.0')
 	M10 = Constant('0.0')
 	M11 = Constant('1e-4')
-	solver.set_M(((M00, M01),(M10,M11))) # isotropic
-	solver.solve(T, savenumpy=save, plot_realtime=plot_realtime)
+	M = ((M00, M01),(M10,M11))
+	solver.set_M(M) # isotropic
+	solver.set_form()
+	solver.solve_for_time_step()
+
+	plot(solver.v_n)
+
+	bidomain_elliptic = Extracellular_solver()
+	bidomain_elliptic.set_geometry(mesh)
+	bidomain_elliptic.set_v(solver.v_p.vector().array())
+	bidomain_elliptic.set_M(M,M)
+	bidomain_elliptic.set_form()
+	bidomain_elliptic.solve_for_u()
+	plot(bidomain_elliptic.u)
+	interactive()
 
 	if save:
 		mcrtmv(int(solver.n_steps), \

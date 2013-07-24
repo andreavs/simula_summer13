@@ -1,0 +1,26 @@
+@comment{x-kbibtex-personnameformatting=<%l><, %f>}
+
+@book{Sundnes06,
+	author = "Sundnes, Joakim and others",
+	booktitle = "{Computing the Electrical Activity in the Heart}",
+	editor = "Barth, T. J. and others",
+	isbn = "978-3-642-07005-1",
+	publisher = "Springer",
+	title = "{Computing the Electrical Activity in the Heart}",
+	year = "2006"
+}
+
+@article{New1
+}
+
+@online{FEniCS,
+	month = jul,
+	title = "{FEniCS home page}",
+	url = "www.fenicsproject.org",
+	year = "2013"
+}
+
+@article{gotran,
+	title = "{Gotran repository}"
+}
+

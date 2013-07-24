@@ -1,0 +1,145 @@
+\title{A solver for the Monodomain Heart Equations}
+\author{
+        Andreas V. Solbr\aa \\
+        a.v.solbra@fys.uio.no \\
+		 \date{\today}
+}
+
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{fullpage}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{subfigure}
+\usepackage{epstopdf}
+\epstopdfsetup{update}
+\usepackage[hyphens]{url}
+\usepackage{gensymb}
+\usepackage{verbatim}
+%\usepackage{slashed}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+%\usepackage{caption}
+%\usepackage{subcaption}
+\newtheorem{thm}{Theorem}
+
+%% Define a new 'leo' style for the package that will use a smaller font.
+\makeatletter
+\def\url@leostyle{%
+  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\ttfamily}}}
+\makeatother
+%% Now actually use the newly defined style.
+\urlstyle{leo}
+
+
+%\usepackage[utf8]{inputenc}
+%\usepackage{textcomp}
+%\usepackage[T1]{fontenc}
+
+
+
+
+\newcommand{\Fig}[1]{Figure~\ref{#1}}
+\newcommand{\fig}[1]{figure~\ref{#1}}
+\newcommand{\eq}[1]{equation~\ref{#1}}
+\newcommand{\Eq}[1]{Equation~\ref{#1}}
+
+% Shortcuts for including equations
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\def\ivec{\textbf{i}}
+\def\jvec{\textbf{j}}
+\def\kvec{\textbf{k}}
+\def\uvec{\textbf{u}}
+\def\vvec{\textbf{v}}
+\def\xvec{\textbf{x}}
+\def\rvec{\textbf{r}}
+\def\Rvec{\textbf{R}}
+\def\Fvec{\textbf{F}}
+\def\S{\hat{S}}
+\def\Svec{\hat{\textbf{S}}}
+\def\H{\hat{H}}
+\def\ro{\hat{\rho}}
+\def\trace{\operatorname{Tr}}
+\def\Lop{\hat{L}}
+\def\etavec{\hat{\boldsymbol\eta}}
+\def\X{\hat{X}}
+\def\Y{\hat{Y}}
+\def\etaop{\hat{\eta}}
+\def\A{\hat{\textbf{A}}}
+\def\B{\textbf{B}}
+\def\aop{\hat{a}}
+\def\aopd{\hat{a}^\dagger}
+\def\bop{\hat{b}}
+\def\bopd{\hat{b}^\dagger}
+
+
+
+
+% Document formatting
+\setlength{\parindent}{0mm}
+\setlength{\parskip}{1.5mm}
+
+% Hyper refs
+\usepackage[pdftex,colorlinks,breaklinks]{hyperref}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{textcomp}
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\definecolor{pink}{RGB}{255, 119, 255}
+\lstset{
+	backgroundcolor=\color{lbcolor},
+	tabsize=4,
+	rulecolor=,
+	language=Python,
+        basicstyle=\scriptsize,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=true,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,1},
+        commentstyle=\color[rgb]{0.133,0.545,0.133},
+        stringstyle=\color[rgb]{0.627,0.126,0.941},
+	title=\lstname
+}
+
+\newcounter{subproject}
+\renewcommand{\thesubproject}{\alph{subproject}}
+\newenvironment{subproj}{
+\begin{description}
+\item[\refstepcounter{subproject}(\thesubproject)]
+}{\end{description}}
+
+\usepackage[]{biblatex}
+\bibliography{refs/refs.bib}
+
+
+\begin{document}
+ \maketitle
+\begin{figure}
+\centering
+ \includegraphics[width=8cm]{figures/heartactivation.png}
+\end{figure}
+
+\include{sections/preface/preface}
+\tableofcontents
+\include{sections/introduction/introduction}
+
+
+
+
+\printbibliography
+\end{document}

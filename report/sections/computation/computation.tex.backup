@@ -1,0 +1,7 @@
+\section{Computational Details}
+In this section we will go through some of more details on how to set up the problem in order to solve it.  
+\subsection{Operator splitting}
+The meat of what we are looking to solve is the equation
+\begin{equation}
+ {\partial v \over \partial t} = \nabla \cdot (M_i \nabla) - I_{ion} (v,s)
+\end{equation}

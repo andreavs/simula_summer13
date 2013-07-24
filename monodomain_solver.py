@@ -2,7 +2,7 @@ import numpy as np
 import os
 import sys
 from dolfin import *
-from dolfin_animation_tools import numpyfy, mcrtmv
+#from dolfin_animation_tools import numpyfy, mcrtmv
 import types
 import goss
 import gotran
@@ -25,7 +25,7 @@ class Monodomain_solver:
 
 	Class attributes:
 	t: array of time values
-    u: array of solution values (at time points t)
+    v: array of solution values (at time points t)
     k: step number of the most recently computed solution
     f: callable object implementing f(v, t)
     dt: time step (assumed constant)
@@ -92,22 +92,22 @@ class Monodomain_solver:
 			if isinstance(u0, np.ndarray):
 				print "initial condition as array, assuming sorted properly... ",
 
-				self.u_p = project(Expression('exp(x[0])'), self.V)
-				print self.u_p.vector().array().shape, u0.shape
+				self.v_p = project(Expression('exp(x[0])'), self.V)
+				print self.v_p.vector().array().shape, u0.shape
 				
-				self.u_p.vector().set_local(u0)
-				self.u_p.vector().apply("insert")
+				self.v_p.vector().set_local(u0)
+				self.v_p.vector().apply("insert")
 			else:
 				# self.u = []
 				# self.u.append(u0)
-				self.u_p = project(u0, self.V)
+				self.v_p = project(u0, self.V)
 			self.initial_condition_set = True
 			self.t = []
 			self.t.append(t0)
-			self.u = TrialFunction(self.V)
-			self.v = TestFunction(self.V)
-			self.u_n = Function(self.V)
-			self.u_n.assign(self.u_p)
+			self.v = TrialFunction(self.V)
+			self.w = TestFunction(self.V)
+			self.v_n = Function(self.V)
+			self.v_n.assign(self.v_p)
 
 			print 'inital conditions set!'
 		else:
@@ -134,10 +134,10 @@ class Monodomain_solver:
 	def set_form(self):
 		if self.M_set:
 			theta = self.method.theta
-			Dt_u_k_n = self.u-self.u_p
-			u_mid = theta*self.u + (1-theta)*self.u_p
+			Dt_v_k_n = self.v-self.v_p
+			v_mid = theta*self.v + (1-theta)*self.v_p
 			dt = Constant(self.dt)
-			form = (Dt_u_k_n*self.v + self.D(self.u_p)*dt*inner(self.M*nabla_grad(u_mid), nabla_grad(self.v)))*dx
+			form = (Dt_v_k_n*self.w + self.D(self.v_p)*dt*inner(self.M*nabla_grad(v_mid), nabla_grad(self.w)))*dx
 			(self.a, self.L) = system(form)
 			self.form_set = True
 		else:
@@ -147,18 +147,18 @@ class Monodomain_solver:
 	def source_term_solve_for_time_step(self, dt):
 		time = self.t[-1]
 		if isinstance(self.f, types.FunctionType):
-			u_p = self.u_p.vector().array()
-			mid_u = np.copy(u_p + (dt/2.)*self.f(u_p, self.mesh, self.V, time))
-			new_u = np.copy(u_p + (dt)*self.f(mid_u, self.mesh, self.V, time))
-			self.u_n.vector().set_local(new_u)
-			self.u_n.vector().apply("insert")
+			v_p = self.v_p.vector().array()
+			mid_v = np.copy(v_p + (dt/2.)*self.f(v_p, self.mesh, self.V, time))
+			new_v = np.copy(v_p + (dt)*self.f(mid_v, self.mesh, self.V, time))
+			self.v_n.vector().set_local(new_v)
+			self.v_n.vector().apply("insert")
 			
 		elif isinstance(self.f, Goss_wrapper):
-			self.f.advance(self.u_n, time, dt)
+			self.f.advance(self.v_n, time, dt)
 			#self.u_p.vector().set_local(new_u);
 		elif isinstance(self.f, list):
 			for i in range(len(self.f)):
-				self.f[i].advance(self.u_n,time,dt)
+				self.f[i].advance(self.v_n,time,dt)
 		else:
 			print "something is wrong with f(v)!!"
 
@@ -176,18 +176,18 @@ class Monodomain_solver:
 			self.source_term_solve_for_time_step(dt) # does the half time step for the ODE part
 			info("source term done!")
 			dt = self.dt
-			self.u_p.assign(self.u_n)
+			self.v_p.assign(self.v_n)
 			info("so far so good, starting the FEniCS solver....")
-			solve(self.a == self.L, self.u_n, solver_parameters={"linear_solver": "gmres"}, \
+			solve(self.a == self.L, self.v_n, solver_parameters={"linear_solver": "gmres", "symmetric": True}, \
       			form_compiler_parameters={"optimize": True})
 			print "FEniCS solver done!"
 			#print self.u_n.vector().array().sum()
-			self.u_p.assign(self.u_n)
+			self.v_p.assign(self.v_n)
 
 			dt = theta*self.dt
 			self.source_term_solve_for_time_step(dt) # does the final time step for the ODE part
-			self.u_p.assign(self.u_n)
-			self.u_p.vector().apply("insert")
+			self.v_p.assign(self.v_n)
+			self.v_p.vector().apply("insert")
 			#return self.u_n
 
 		else:
@@ -217,7 +217,7 @@ class Monodomain_solver:
 					rescale = True
 					mode = 'auto'
 
-				plot(self.u_p, wireframe=False, rescale=rescale, tile_windows=True, mode = mode)
+				plot(self.v_p, wireframe=False, rescale=rescale, tile_windows=True, mode = mode)
 
 ### end of class monodomain_solver ###
 
@@ -259,7 +259,7 @@ class Goss_wrapper:
 		self.advance = types.MethodType(advance, self, Goss_wrapper)
 		self.goss_solver = goss_solver
 		self.vertex_to_dof_map = space.dofmap().vertex_to_dof_map(space.mesh())
-		self.vertex_temp_values = np.zeros(space.mesh().coordinates().shape[0], dtype=np.float_)
+		self.vertex_temp_values = np.zeros(self.vertex_to_dof_map.shape[0])
 		# print self.vertex_temp_values.shape, self.vertex_to_dof_map.shape, max(self.vertex_to_dof_map)
 		# sys.exit(1)
 
