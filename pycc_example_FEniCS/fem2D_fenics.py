@@ -119,8 +119,8 @@ def advance1(self, u, t, dt):
 if __name__ == '__main__':
 	### simulation parameters:
 	dt = 1
-	T = 50
-	n = 100;
+	T = 200
+	n = 50;
 	FEniCS_time_solver_method = 'BE'
 	method = Time_solver(FEniCS_time_solver_method)
 

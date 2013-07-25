@@ -97,8 +97,8 @@ class Extracellular_solver:
 			solve(self.a == self.L, self.u_n)#, solver_parameters={"linear_solver": "gmres", "symmetric": True}, \
       			#form_compiler_parameters={"optimize": True})
 			
-			plot(self.u_n)
-			interactive()
+			#plot(self.u_n)
+			#interactive()
 
 		else:
 			print 'form not set!'

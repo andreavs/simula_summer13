@@ -1,9 +1,12 @@
+import numpy as np
+import pylab
+import os, sys
+
+parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0,parentdir) 
 from monodomain_solver import Monodomain_solver, Time_solver, Goss_wrapper
 from extracellular_solver import Extracellular_solver
 from dolfin_animation_tools import numpyfy, mcrtmv
-import numpy as np
-import pylab
-import sys
 
 from gotran import load_ode
 from dolfin import *
@@ -146,18 +149,39 @@ if __name__ == '__main__':
 	M11 = Constant('1e-4')
 	M = ((M00, M01),(M10,M11))
 	solver.set_M(M) # isotropic
-	solver.solve(T, savenumpy=False, plot_realtime=True)
 
-	if save:
-		mcrtmv(int(solver.n_steps), \
-			0.01, \
-			solver.mesh, \
-			[x_nodes,y_nodes], \
-			solver.vertex_to_dof_map, \
-			savemovie=savemovie, \
-			mvname='test', \
-			vmin=-80, \
-			vmax=10)
+	solver.set_form()
+	solver.solve_for_time_step()
+
+	plot(solver.v_n)
+
+	bidomain_elliptic = Extracellular_solver()
+	bidomain_elliptic.set_geometry(mesh)
+	bidomain_elliptic.set_v(solver.v_p.vector().array())
+	bidomain_elliptic.set_M(M,M)
+	bidomain_elliptic.set_form()
+	bidomain_elliptic.solve_for_u()
+	plot(bidomain_elliptic.u_n)
+	interactive()
+
+	torso_geometry = Rectangle(-1,-1, 2,2) - Rectangle(0,0,1,1)
+	torso = Mesh(torso_geometry, 12)
+	plot(torso)
+	interactive()
+
+
+	# solver.solve(T, savenumpy=False, plot_realtime=True)
+
+	# if save:
+	# 	mcrtmv(int(solver.n_steps), \
+	# 		0.01, \
+	# 		solver.mesh, \
+	# 		[x_nodes,y_nodes], \
+	# 		solver.vertex_to_dof_map, \
+	# 		savemovie=savemovie, \
+	# 		mvname='test', \
+	# 		vmin=-80, \
+	# 		vmax=10)
 	
 
 

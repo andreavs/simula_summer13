@@ -34,8 +34,6 @@ for facet in xrange(mesh.num_faces()):
   if values[facet]:
     vertex_values[con20(facet)] = values[facet]
 
-
-
 vertex_to_dof_map = V.dofmap().vertex_to_dof_map(V.mesh())
 new_vertex_values = np.zeros(len(vertex_values))
 new_vertex_values = vertex_values[vertex_to_dof_map]
