@@ -85,6 +85,25 @@
   \field{year}{2006}
 \endentry
 
+\entry{Else10}{thesis}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Zakariassen}{Z.}%
+     {Else~Bergene}{E.~B.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{ZEB1}
+  \strng{fullhash}{ZEB1}
+  \field{sortinit}{Z}
+  \field{title}{{sammenligning av numeriske metoder for monodomene- og
+  bidomenemodellen}}
+  \list{institution}{1}{%
+    {University of Oslo}%
+  }
+  \field{type}{mathesis}
+\endentry
+
 \lossort
 \endlossort
 

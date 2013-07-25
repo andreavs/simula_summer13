@@ -1,0 +1,44 @@
+\section{Description of the main program}
+In this section we will discuss the useage of the main program, \verb monodomain_solver.py . We typically begin by creating a \verb Monodomain_solver -object, and then we set all that should be set. A typical set-up will then look something like 
+\begin{lstlisting}
+ 	solver = Monodomain_solver(dt=0.1)
+	solver.set_geometry(geometry)
+	solver.set_source_term(goss_wrapper)
+	solver.set_M(tensor_field)
+	solver.set_boundary_conditions()
+	solver.set_time_solver_method(Time_solver('CN'))
+	solver.set_initial_condition(V_FEniCS_ordered)
+\end{lstlisting}
+let us go through these statements. 
+\begin{enumerate}
+ \item The first line creates the solver. The time step should be set here.
+ 
+ \item The second line sets the geometry for the problem. The input can be either a string, which will be interpreted as a path to a .xml mesh file, a Mesh object or a list of up to three integers. The last case creates a unit line/square/cube mesh with as many elements in each direction as input. 
+ 
+ \item the thrid line sets the source term. The input can be either a Goss\textunderscore wrapper object (see below) or a function. The function is simply interpreted as the right hand side of the equation 
+\begin{equation}
+ {dv \over dt} = f(v)
+\end{equation}
+
+\item the fourth line sets the conductivity tensor. The input should be a $n\times n$ tuple where $n$ is the dimension of the geometry. 
+
+\item the fifth line should set the boundary conditions, but really this does nothing at this point, and the boundary is just assumed to adhere to van Neumann conditions.
+
+\item the sixth line sets the time solver method. It takes as input a \verb Time_solver  object (see below).
+\end{enumerate}
+
+
+Once the system is initialized, we can solve by calling 
+
+\begin{lstlisting}
+ solver.solve(T, savenumpy=save, plot_realtime=True)
+\end{lstlisting}
+where \verb T is the time we want to solve to. \verb savenumpy  set whether or not to store the results, \verb plot_realtime  sets whether or not to plot at runtime using the viper tool. 
+
+The default program in \verb monodomain_solver.py  runs the solver with a self-defined source term ($f(v) = -v$).
+
+\subsection{Goss\textunderscore wrapper}
+the goss wrapper is meant to be a sort of contract to ensure that there is some function to advance the solution (like an interface in java). The advance function is defined by the user, but should typically include the goss method \verb forward(dt,time) , which advances the solution in time from \verb time  to \verb time+dt . Examples of advance functions can be found in \verb fe.py  and \verb fem2D_fenics.py . 
+
+\subsection{Time\textunderscore solver}
+Time solver typically takes as input \verb 'FE' , \verb 'BE'  or \verb 'CN' . Crank-Nicolson is second order, backward euler is the most stable, dont use forward euler for our problems.

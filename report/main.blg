@@ -5,6 +5,9 @@ The style file: biblatex.bst
 A level-1 auxiliary file: sections/preface/preface.aux
 A level-1 auxiliary file: sections/introduction/introduction.aux
 A level-1 auxiliary file: sections/computation/computation.aux
+A level-1 auxiliary file: sections/external/external.aux
+A level-1 auxiliary file: sections/source/source.aux
+A level-1 auxiliary file: sections/othercode/othercode.aux
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
@@ -21,44 +24,44 @@ Database file #2: refs/refs.bib
 Biblatex version: 1.7
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
-You've used 6 entries,
+You've used 7 entries,
             6019 wiz_defined-function locations,
-            1147 strings with 8513 characters,
-and the built_in function-call counts, 10937 in all, are:
-= -- 343
-> -- 193
-< -- 110
-+ -- 85
-- -- 80
-* -- 520
-:= -- 620
+            1155 strings with 8728 characters,
+and the built_in function-call counts, 14063 in all, are:
+= -- 500
+> -- 290
+< -- 153
++ -- 118
+- -- 104
+* -- 680
+:= -- 780
 add.period$ -- 0
-call.type$ -- 6
-change.case$ -- 38
+call.type$ -- 7
+change.case$ -- 65
 chr.to.int$ -- 58
-cite$ -- 10
-duplicate$ -- 1281
-empty$ -- 1464
-format.name$ -- 58
-if$ -- 2547
+cite$ -- 12
+duplicate$ -- 1639
+empty$ -- 1791
+format.name$ -- 107
+if$ -- 3286
 int.to.chr$ -- 0
-int.to.str$ -- 8
+int.to.str$ -- 11
 missing$ -- 0
-newline$ -- 91
-num.names$ -- 54
-pop$ -- 1614
+newline$ -- 109
+num.names$ -- 116
+pop$ -- 1931
 preamble$ -- 1
-purify$ -- 35
+purify$ -- 63
 quote$ -- 0
-skip$ -- 550
+skip$ -- 762
 stack$ -- 0
-substring$ -- 242
-swap$ -- 417
-text.length$ -- 106
-text.prefix$ -- 5
+substring$ -- 347
+swap$ -- 524
+text.length$ -- 131
+text.prefix$ -- 6
 top$ -- 1
-type$ -- 216
+type$ -- 253
 warning$ -- 0
-while$ -- 100
+while$ -- 117
 width$ -- 0
-write$ -- 84
+write$ -- 101

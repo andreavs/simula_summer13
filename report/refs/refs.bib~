@@ -31,3 +31,15 @@
 	year = "2013"
 }
 
+@online{source,
+	month = jul,
+	title = "{source code repository}",
+	url = "https://github.com/andreavs/simula_summer13",
+	year = "2013"
+}
+
+@mastersthesis{Else10,
+	author = "Zakariassen, Else Bergene",
+	title = "{sammenligning av numeriske metoder for monodomene- og bidomenemodellen}"
+}
+

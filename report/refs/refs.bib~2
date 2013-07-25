@@ -10,9 +10,6 @@
 	year = "2006"
 }
 
-@article{New1
-}
-
 @online{FEniCS,
 	month = jul,
 	title = "{FEniCS home page}",
@@ -20,7 +17,24 @@
 	year = "2013"
 }
 
-@article{gotran,
-	title = "{Gotran repository}"
+@online{gotran,
+	month = jul,
+	title = "{gotran repository}",
+	url = "https://bitbucket.org/johanhake/gotran",
+	year = "2013"
+}
+
+@online{goss,
+	month = jul,
+	title = "{goss repository}",
+	url = "https://bitbucket.org/johanhake/goss",
+	year = "2013"
+}
+
+@online{source,
+	month = jul,
+	title = "{source code repository}",
+	url = "https://github.com/andreavs/simula_summer13",
+	year = "2013"
 }
 

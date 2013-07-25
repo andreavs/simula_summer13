@@ -5,3 +5,12 @@ The meat of what we are looking to solve is the equation
 \begin{equation}
  {\partial v \over \partial t} = \nabla \cdot (M_i \nabla) - I_{ion} (v,s)
 \end{equation}
+we could in principle solve this in one round, but as we do not have complete information about $I_{ion}(v,s)$, we typically can only rely on goss to solve the equation 
+\begin{equation}
+ {\partial v \over \partial t} = -I_{ion}(v,s)
+\end{equation}
+for one time step. Fortunately, this is exactly what we need when we use the technique called operator splitting. The idea is the following: consider a problem of the form 
+\begin{align}
+ {\partial v \over \partial t} = (L_1 + L_2)v
+ v(0) = v_0
+\end{align}

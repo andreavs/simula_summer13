@@ -77,7 +77,15 @@
 \def\bop{\hat{b}}
 \def\bopd{\hat{b}^\dagger}
 
+% (1) choose a font that is available as T1
+% for example:
+\usepackage{lmodern}
 
+% (2) specify encoding
+\usepackage[T1]{fontenc}
+
+% (3) load symbol definitions
+\usepackage{textcomp}
 
 
 % Document formatting
@@ -139,6 +147,8 @@
 \include{sections/introduction/introduction}
 \include{sections/computation/computation}
 \include{sections/external/external}
+\include{sections/source/source}
+\include{sections/othercode/othercode}
 
 
 

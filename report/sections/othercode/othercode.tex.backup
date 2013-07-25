@@ -1,0 +1,92 @@
+\section{Explanation of other files in the repo}
+The repo contains a lot of files aside from the monodomain solver, the extracellular solver and the torso solver. In this section I will explain some of them, and detail the work done. They can be split into to groups; some are implementations of the solvers for various ODEs and geometries, others are not. 
+
+\subsection{Implementations}
+Several of the programs use the monodomain solver. Here are some of the notable ones.
+
+\subsubsection{fe.py}
+This was the first implementation using the goss package. Notably, unless i have since fixed the code, the advance function handles the ordering difference between the mesh.coordinates()-vector and the solution vector. This is very inefficient, and it's better to fix the orderering when calling \verb set_parameter_field(...) . The program uses the myocyte model, and add a stimulus on the cells in a certain area. The stimulus then spreads as diffusion causes nearby cells to activate. 
+
+
+\subsubsection{fem2D\textunderscore fenics.py}
+This code uses a slightly more advanced model for some of the cells in the middle of the grid, difransesco.ode, which causes the cells to spontaneously activate. The activation then spreads through the other cells in the same way as fe.py
+
+\subsubsection{myocyte\textunderscore activation.py}
+this program selects some areas as nodes in a purkinje network (see below), and adds a stimulus on these cells. The stimulus then spreads through the rest of the heart. This simulation uses a 3D heart mesh. The front page picture is from this simulation
+
+\subsection{Other stuff}
+Here we'll explain some of the other code. 
+
+\subsubsection{purkinje}
+The spontaneous heart activation starts in the atrium, then passes through a common point (the Atrioventricular node) before its spreads to the ventricles. The spread happens mainly through the so-called purkinje fibers (the propagation is several hundred times faster through these cells than regular heart tissue). The purkinje files models such nerves based on the same heart mesh used in myocyte\textunderscore activation. The leaf nodes found by this model are used for the activation is this program. 
+
+\subsubsection{nose test}
+Nose tests is a simple tools for performin unit testing of the code. One can test such things as error convergence and constant solution tests. To run the tests, one can type 
+\begin{lstlisting}
+ nosetests -a '!skip'
+\end{lstlisting}
+the extra commands are because the testing tool picks up some fenics functions that we do not want to test. 
+
+These are somewhat outdated at this point, and should be overhauled, but I'm not sure if there will be time for this during my stint. 
+
+
+\subsubsection{dolfin mesh from triangle}
+Several tools exists to make and manipulate meshes. One such tool is triangle, which is available from apt-get. Triangle can take .poly files, which contain meshes and mesh functions, and convert these to other files. Here is a description on how to use it with dolfin. We start by entering into the terminal 
+\begin{verbatim}
+triangle -a0.01 -A -q28 -p atrium2D.poly
+\end{verbatim}
+where in this case the mesh file is called atrium2D.poly. This creates the files atrium2D.1.edge and atrium2D.1.node files. we can then create a dolfin mesh by entering either of the following commands
+\begin{verbatim}
+ dolfin-convert atrium2D.1.node atrium2D.xml
+ dolfin-convert atrium2D.1.ele atrium2D.xml
+\end{verbatim}
+This will create the files atrium2D.xml and atrium2D.attr0.xml, where the former is a dolfin mesh and the latter is a mesh function. In order to visualize this we can use the following code. 
+\begin{lstlisting}
+ from dolfin import *
+mesh = Mesh('atrium2D.xml')
+values = MeshFunction('double', mesh, 'atrium2D.attr0.xml')
+
+#plot(mesh)
+plot(values)
+interactive()
+\end{lstlisting}
+
+Mesh functions are defined on the node values. If we want to for instance use the function to define the conductivity tensor, we need a function that is defined on the vertexes. We can use the following hack to translate the values to a vertex values function 
+\begin{lstlisting}
+ p = Function(V)
+
+### hack to assign the meshfunction to vertex values:
+dim = 2
+data = values
+values = values.array()
+mesh.init(dim)
+vertices = type(data)(mesh, 0)
+vertex_values = vertices.array()
+vertex_values[:] = 0
+con20 = mesh.topology()(dim,0)
+
+for facet in xrange(mesh.num_faces()):
+  if values[facet]:
+    vertex_values[con20(facet)] = values[facet]
+
+vertex_to_dof_map = V.dofmap().vertex_to_dof_map(V.mesh())
+new_vertex_values = np.zeros(len(vertex_values))
+new_vertex_values = vertex_values[vertex_to_dof_map]
+
+# Put any function of the point values here: 
+new_vertex_values = 1.*(new_vertex_values!=3)
+
+p.vector().set_local(new_vertex_values)
+
+# visualize the vertex function
+plot(p)
+interactive()
+\end{lstlisting}
+This code is also included in the file \verb testcode.py . 
+
+\subsubsection{grid and tetgen}
+a
+
+\subsubsection{dolfin\textunderscore animation\textunderscore tools.py}
+a
+
