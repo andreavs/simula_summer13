@@ -2,6 +2,8 @@ import os,sys
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0,parentdir) 
 from monodomain_solver import *
+from extracellular_solver import *
+from torso_solver import *
 
 import numpy as np
 from scipy import sparse
@@ -12,7 +14,9 @@ from scipy.sparse.linalg import *
 import pylab
 from dolfin import *
 from viper import *
+from dolfin import plot, interactive
 from goss import *
+
 from gotran import load_ode
 import time
 
@@ -176,7 +180,7 @@ if __name__ == '__main__':
 	# Set up the solver
 	solver = Monodomain_solver(dim=3, dt=dt)
 	method = Time_solver('CN')
-	mesh = Mesh('meshes/reference.xml')
+	mesh = Mesh('meshes/reference.xml.gz')
 	solver.set_geometry(mesh)
 	solver.set_time_solver_method(method)
 	solver.set_M(get_tensor())
@@ -205,4 +209,118 @@ if __name__ == '__main__':
 	solver.set_initial_condition(fenics_ordered_init_state);
 	solver.set_boundary_conditions();
 
-	solver.solve(T, savenumpy=False, plot_realtime=True)
+	solver.set_form()
+
+	solver.solve_for_time_step()
+
+	bidomain_elliptic = Extracellular_solver()
+	bidomain_elliptic.set_geometry(mesh)
+	bidomain_elliptic.set_v(solver.v_p.vector().array())
+	bidomain_elliptic.set_M(get_tensor(),get_tensor())
+	bidomain_elliptic.set_form()
+	bidomain_elliptic.solve_for_u()
+	
+	# plot(bidomain_elliptic.u_n)
+	# interactive()
+
+	torso = Mesh('meshes/torso_without_heart.xml.gz')
+	torso_coordinates = torso.coordinates()
+
+	# plot(torso)
+	# interactive()
+
+	torso_boundary_function = MeshFunction('size_t', torso, 2)
+	torso_boundary_function.set_all(0)
+
+	# Initialize sub-domain instances
+	heart_boundary = 'x[0]>-10 && x[0]<10 && x[1]>-10 && x[1]<6 && x[2]>-10 && x[2]<10 && on_boundary'
+	heart_boundary = compile_subdomains(heart_boundary)
+	heart_boundary.mark(torso_boundary_function,1)
+
+	# plot(torso_boundary_function)
+	# interactive()
+
+
+	### hack to assign the meshfunction to vertex values:
+	values = torso_boundary_function.array()
+	#torso.init(dim)
+	vertices = type(torso_boundary_function)(torso, 0)
+	vertex_values = vertices.array()
+	vertex_values[:] = 0
+	con20 = torso.topology()(2,0)
+
+	for facet in xrange(torso.num_facets()):
+	  if values[facet]:
+	    vertex_values[con20(facet)] = values[facet]
+
+	V = FunctionSpace(torso, 'CG', 1)
+	vertices.set_values(vertex_values)
+
+	# plot(vertices)
+	# interactive()
+
+	v = Function(V)
+	v_array = v.vector().array()
+	torso_bc_vec = vertices.array()
+	idx = np.argwhere(torso_bc_vec == 1)
+	
+	heart_coordinates = bidomain_elliptic.mesh.coordinates()
+	heart_vertex_to_dof_map = solver.V.dofmap().vertex_to_dof_map(solver.V.mesh())
+	heart_coordinates = heart_coordinates[heart_vertex_to_dof_map]
+	torso_vertex_to_dof_map = V.dofmap().vertex_to_dof_map(V.mesh())
+	heart_solution_array = bidomain_elliptic.u_n.vector().array()
+	heart_to_torso_map = np.zeros(len(idx), dtype='int')
+	dof_sorted_torso_coordinates = torso_coordinates[torso_vertex_to_dof_map]
+	for j,i in enumerate(idx):
+		diff = heart_coordinates - dof_sorted_torso_coordinates[i]
+		diff_floats = np.sum(diff**2,axis=1)
+		min_index = np.argmin(diff_floats)
+		heart_to_torso_map[j] = min_index
+		#value = heart_solution_array[min_index]
+		#v_array[i] = value
+
+	values = np.zeros(v_array.shape)
+	values[idx] = heart_solution_array[heart_to_torso_map]
+	print values.shape, v_array.shape
+
+
+	#v_array = values[torso_vertex_to_dof_map]
+
+	v.vector().set_local(values)
+	# plot(v)
+	# interactive()
+
+	torso_bcs = DirichletBC(V, v, torso_boundary_function,1)#, method='pointwise')
+
+	torso_solver = Torso_solver()
+	torso_solver.set_geometry(torso)
+	torso_solver.set_M(get_tensor())
+	torso_solver.set_bcs(torso_bcs)
+	torso_solver.set_form()
+	torso_solver.solve_for_u()
+
+	for i in range(200):
+		solver.solve_for_time_step()
+		bidomain_elliptic.set_v(solver.v_n.vector().array())
+		bidomain_elliptic.set_form()
+		bidomain_elliptic.solve_for_u()
+		heart_solution_array = bidomain_elliptic.u_n.vector().array()
+		values[idx] = heart_solution_array[heart_to_torso_map]
+		v.vector().set_local(values)
+		torso_solver.solve_for_u()
+		padded_index = '%04d' % i
+		a = plot(solver.v_n)
+		a.write_png('heart_cross_pot_' + padded_index)
+		b = plot(bidomain_elliptic.u_n)
+		b.write_png('heart_extracellular_' + padded_index)
+		c = plot(torso_solver.u_n)
+		c.write_png('torso_' + padded_index)
+
+
+	
+	#plot(torso_solver.u_n)
+	#interactive()
+
+
+
+	#solver.solve(T, savenumpy=False, plot_realtime=True)

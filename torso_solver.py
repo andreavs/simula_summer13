@@ -2,7 +2,7 @@ import numpy as np
 import os
 import sys
 from dolfin import *
-from dolfin_animation_tools import numpyfy, mcrtmv
+#from dolfin_animation_tools import numpyfy, mcrtmv
 class Torso_solver:
 	"""
 	class for solving the elliptic equation in the bidomain system
@@ -73,7 +73,7 @@ class Torso_solver:
 
 	def set_form(self):
 		if self.M_set and self.geometry_set and self.bcs_set:
-			M_grad_u = (self.M_i + self.M_e)*nabla_grad(self.u)
+			M_grad_u = (self.M_o)*nabla_grad(self.u)
 			form = inner(M_grad_u,nabla_grad(self.w))*dx 
 			(self.a, self.L) = system(form)
 			self.form_set = True
@@ -89,8 +89,6 @@ class Torso_solver:
 			solve(self.a == self.L, self.u_n, self.bcs)#, solver_parameters={"linear_solver": "gmres", "symmetric": True}, \
       			#form_compiler_parameters={"optimize": True})
 			
-			plot(self.u_n)
-			interactive()
 
 		else:
 			print 'form not set!'

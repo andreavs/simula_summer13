@@ -1,11 +1,12 @@
 import numpy as np
 import pylab
 import os, sys
-
+np.set_printoptions(threshold=np.nan)
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0,parentdir) 
 from monodomain_solver import Monodomain_solver, Time_solver, Goss_wrapper
 from extracellular_solver import Extracellular_solver
+from torso_solver import Torso_solver
 from dolfin_animation_tools import numpyfy, mcrtmv
 
 from gotran import load_ode
@@ -17,7 +18,8 @@ def stimulation_domain(C, amp=-10):
 	ist = np.zeros(m);
 	for i in range(m):
 		x, y = C[i,:]
-		if np.sqrt(((y-0.5)**2+x**2))<0.1:
+		#if np.sqrt(((y-0.5)**2+x**2))<0.1:
+		if np.sqrt(((y-0.5)**2+(x-0.5)**2))<0.1:
 			ist[i] = amp
 
 	return ist
@@ -81,6 +83,11 @@ def advance(self, u, t, dt):
 	u.vector().set_local(dof_temp_values)
 	u.vector().apply('insert')
 	return u
+
+class Inner_box(SubDomain):
+	def inside(self, x, on_boundary):
+		eps = 1e-6
+		return between(x[0], (0-eps, 1+eps)) and between(x[1], (0-eps, 1+eps)) and on_boundary
 
 if __name__ == '__main__':
 	### Parameters
@@ -151,7 +158,8 @@ if __name__ == '__main__':
 	solver.set_M(M) # isotropic
 
 	solver.set_form()
-	solver.solve_for_time_step()
+	for i in range(110):
+		solver.solve_for_time_step()
 
 	plot(solver.v_n)
 
@@ -162,13 +170,92 @@ if __name__ == '__main__':
 	bidomain_elliptic.set_form()
 	bidomain_elliptic.solve_for_u()
 	plot(bidomain_elliptic.u_n)
-	interactive()
 
 	torso_geometry = Rectangle(-1,-1, 2,2) - Rectangle(0,0,1,1)
-	torso = Mesh(torso_geometry, 12)
-	plot(torso)
-	interactive()
+	torso = Mesh(torso_geometry, 50)
+	#plot(torso)
+	torso_coordinates = torso.coordinates()
+	eps = 1e-6
 
+	#interactive()
+
+	torso_boundary_function = MeshFunction('size_t', torso, 1)
+	torso_boundary_function.set_all(0)
+
+	# Initialize sub-domain instances
+	inner_box = Inner_box()
+	inner_box.mark(torso_boundary_function,1)
+
+
+	### hack to assign the meshfunction to vertex values:
+	dim = 2
+	values = torso_boundary_function.array()
+	#torso.init(dim)
+	vertices = type(torso_boundary_function)(torso, 0)
+	vertex_values = vertices.array()
+	vertex_values[:] = 0
+	con20 = torso.topology()(1,0)
+
+	for facet in xrange(torso.num_edges()):
+	  if values[facet]:
+	    vertex_values[con20(facet)] = values[facet]
+
+	V = FunctionSpace(torso, 'CG', 1)
+	vertices.set_values(vertex_values)
+
+	plot(vertices)
+
+
+	# for i in [left,top,right,bottom]:
+	# 	i.mark(torso_boundary_function, 1)
+
+	#plot(torso_boundary_function)	
+	#interactive()
+
+
+	v = Function(V)
+	v_array = v.vector().array()
+	torso_bc_vec = vertices.array()
+	idx = np.argwhere(torso_bc_vec == 1)
+	
+	heart_coordinates = bidomain_elliptic.mesh.coordinates()
+	heart_vertex_to_dof_map = solver.V.dofmap().vertex_to_dof_map(solver.V.mesh())
+	heart_coordinates = heart_coordinates[heart_vertex_to_dof_map]
+	torso_vertex_to_dof_map = V.dofmap().vertex_to_dof_map(V.mesh())
+	heart_solution_array = bidomain_elliptic.u_n.vector().array()
+
+
+	for i in idx:
+		diff = heart_coordinates - torso_coordinates[i]
+		diff_floats = np.sum(diff**2,axis=1)
+		min_index = np.argmin(diff_floats)
+		value = heart_solution_array[min_index]
+		v_array[i] = value
+
+
+	#v_array[idx[:,0]] = 1.
+	# new_array = np.zeros(v_array.shape[0], dtype='float_')
+	# new_array[idx[:,0]] = 1.
+
+	v_array = v_array[torso_vertex_to_dof_map]
+
+	v.vector().set_local(v_array)
+	# plot(v)
+	# interactive()
+	torso_mesh_boundary_marker_function = MeshFunction('size_t', torso, 1)
+	torso_mesh_boundary_marker_function.set_all(0)
+	inner_box.mark(torso_mesh_boundary_marker_function,1)
+	torso_bcs = DirichletBC(V, v, torso_mesh_boundary_marker_function,1)#, method='pointwise')
+
+	torso_solver = Torso_solver()
+	torso_solver.set_geometry(torso)
+	torso_solver.set_M(M)
+	torso_solver.set_bcs(torso_bcs)
+	torso_solver.set_form()
+	torso_solver.solve_for_u()
+
+	plot(torso_solver.u_n)
+	interactive()
 
 	# solver.solve(T, savenumpy=False, plot_realtime=True)
 

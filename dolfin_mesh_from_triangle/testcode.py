@@ -10,7 +10,7 @@ method = Time_solver('BE')
 solver.set_geometry('atrium2D.xml')
 
 
-mesh = mesh=solver.mesh
+mesh = solver.mesh
 values = MeshFunction('double', mesh, 'atrium2D.attr0.xml')
 V = solver.V
 
@@ -24,7 +24,7 @@ p = Function(V)
 dim = 2
 data = values
 values = values.array()
-mesh.init(dim)
+#mesh.init(dim)
 vertices = type(data)(mesh, 0)
 vertex_values = vertices.array()
 vertex_values[:] = 0
@@ -39,7 +39,7 @@ new_vertex_values = np.zeros(len(vertex_values))
 new_vertex_values = vertex_values[vertex_to_dof_map]
 
 # Put any function of the point values here: 
-new_vertex_values = 1.*(new_vertex_values!=3)
+#new_vertex_values = 1.*(new_vertex_values!=3)
 
 p.vector().set_local(new_vertex_values)
 
@@ -54,13 +54,6 @@ M = ((p,0.0),(0.0,p))
 
 
 M = as_tensor(M)
-
-p = M[0,0]
-
-plot(p)
-interactive()
-
-dshfosdd
 ### the rest is just constructing a sample problem: 
 
 def myf(v, mesh, space, time):

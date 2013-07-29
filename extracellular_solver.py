@@ -2,7 +2,7 @@ import numpy as np
 import os
 import sys
 from dolfin import *
-from dolfin_animation_tools import numpyfy, mcrtmv
+#from dolfin_animation_tools import numpyfy, mcrtmv
 class Extracellular_solver:
 	"""
 	class for solving the elliptic equation in the bidomain system
