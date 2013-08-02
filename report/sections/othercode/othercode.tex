@@ -21,6 +21,8 @@ In the folder ``the\textunderscore final\textunderscore run'' there is the pytho
 \end{equation}
 where $M = M_e+M_i$ inside the heart, and $M=M_o$ outside the heart. The tensors in this case are taken from a simulation using the fiberrules package (ask around at simula to get access to this). In order to set $M$, some really roundabout functions are used, \verb get_inner_heart_tensor()  and \verb get_torso_tensor() . What they do is to extract the 9 different scalar fields found in the 3 vector fields, and manually compute the cross product of the vectors. I'm not sure why this was neccessary, but not doing it in this way would cause the program to crash, saying that the function was not defined on the domain. This program marks the end of my intership. 
 
+\subsubsection{atria}
+The code was also tested on an atrium mesh, where a given region had zero conductivity. For this, see the folder atria.
 
 \subsection{Other stuff}
 Here we'll explain some of the other code. 
