@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012/Debian) (format=pdflatex 2013.7.22)  25 JUL 2013 11:09
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012/Debian) (format=pdflatex 2013.7.22)  2 AUG 2013 14:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -843,7 +843,7 @@ LaTeX Font Info:    Try loading font information for TS1+lmr on input line 140.
 (/usr/share/texmf/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-<figures/heartactivation.png, id=112, 238.64156pt x 194.97844pt>
+<figures/heartactivation.png, id=124, 238.64156pt x 194.97844pt>
 File: figures/heartactivation.png Graphic file (type png)
 
 <use figures/heartactivation.png>
@@ -871,10 +871,10 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
  [3
 
-]
+] [4]
 \openout2 = `sections/introduction/introduction.aux'.
 
- (./sections/introduction/introduction.tex [4
+ (./sections/introduction/introduction.tex [5
 
 ]
 
@@ -882,10 +882,10 @@ Package amsmath Warning: Foreign command \over;
 (amsmath)                \frac or \genfrac should be used instead
 (amsmath)                 on input line 63.
 
-[5]) [6]
+[6]) [7]
 \openout2 = `sections/computation/computation.aux'.
 
- (./sections/computation/computation.tex) [7
+ (./sections/computation/computation.tex) [8
 
 
 ]
@@ -918,23 +918,23 @@ Package epstopdf Info: Source file: <figures/gotran.eps>
 ed-to.pdf figures/gotran.eps>
 (epstopdf)             \includegraphics on input line 34.
 Package epstopdf Info: Output file is already uptodate.
-<figures/gotran-eps-converted-to.pdf, id=230, 587.19376pt x 442.65375pt>
+<figures/gotran-eps-converted-to.pdf, id=249, 587.19376pt x 442.65375pt>
 File: figures/gotran-eps-converted-to.pdf Graphic file (type pdf)
 
 <use figures/gotran-eps-converted-to.pdf>
 Package pdftex.def Info: figures/gotran-eps-converted-to.pdf used on input line
  34.
 (pdftex.def)             Requested size: 284.52756pt x 214.49092pt.
- [8
+ [9
 
 
-] [9 <./figures/gotran-eps-converted-to.pdf>]) [10]
+] [10 <./figures/gotran-eps-converted-to.pdf>]) [11]
 \openout2 = `sections/source/source.aux'.
 
- (./sections/source/source.tex [11
+ (./sections/source/source.tex [12
 
 
-]) [12]
+]) [13]
 \openout2 = `sections/othercode/othercode.aux'.
 
 
@@ -944,10 +944,10 @@ Overfull \hbox (5.92232pt too wide) in paragraph at lines 8--9
 -ence be-tween the mesh.coordinates()-
  []
 
-[13
+[14
 
 
-] [14] [15]) [16]
+] [15] [16] [17] [18]) [19]
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <10.95> on input line 156.
 
@@ -958,7 +958,7 @@ ndreavs / simula _ summer13$[][]\T1/lmr/m/n/12 .
  []
 
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 157.
-[17
+[20
 
 ]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 157.
@@ -969,20 +969,20 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 157.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 157.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 157.
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 4D9AC1CCA725E0D46A591831965ED82A;1889.
+(rerunfilecheck)             Checksum: ACD649A6198C2C9CE256EAED22386425;2143.
 Package logreq Info: Writing requests to 'main.run.xml'.
 \openout1 = `main.run.xml'.
 
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 157.
  ) 
 Here is how much of TeX's memory you used:
- 13634 strings out of 493485
- 209228 string characters out of 3143526
- 575233 words of memory out of 3000000
- 16484 multiletter control sequences out of 15000+200000
+ 13676 strings out of 493485
+ 209808 string characters out of 3143526
+ 590233 words of memory out of 3000000
+ 16503 multiletter control sequences out of 15000+200000
  77987 words of font info for 80 fonts, out of 3000000 for 9000
  957 hyphenation exceptions out of 8191
- 42i,13n,40p,994b,1710s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 42i,13n,40p,994b,1429s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dv
 ips/lm/lm-mathsy.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/shar
 e/texmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ma
@@ -996,10 +996,10 @@ e/texmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/public/l
 m/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share/texm
 f/fonts/type1/public/lm/lmtt10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt
 12.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt8.pfb>
-Output written on main.pdf (17 pages, 363188 bytes).
+Output written on main.pdf (20 pages, 369708 bytes).
 PDF statistics:
- 481 PDF objects out of 1000 (max. 8388607)
- 425 compressed objects within 5 object streams
- 165 named destinations out of 1000 (max. 500000)
- 227 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 531 PDF objects out of 1000 (max. 8388607)
+ 472 compressed objects within 5 object streams
+ 188 named destinations out of 1000 (max. 500000)
+ 251 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -578,7 +578,10 @@ if __name__ == '__main__':
 		padded_index = '%04d' % i
 		a = plot(solver.v_n, interactive=False, range_min=-80., range_max=80.)
 		a.write_png('heart' + padded_index)
-		b = plot(bidomain_elliptic.u_n, interactive=False, range_min=-20., range_max=20.)
+		u_array = bidomain_elliptic.u_n.vector().array()
+		u_array = u_array - np.sum(u_array)/u_array.shape[0]
+		bidomain_elliptic.u_n.vector().set_local(u_array)
+		b = plot(bidomain_elliptic.u_n, interactive=False, range_min=-10., range_max=10.)
 		b.write_png('torso' + padded_index)
 
 	# plot(bidomain_elliptic.u_n)

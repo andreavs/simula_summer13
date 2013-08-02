@@ -12,10 +12,50 @@ This was the first implementation using the goss package. Notably, unless i have
 This code uses a slightly more advanced model for some of the cells in the middle of the grid, difransesco.ode, which causes the cells to spontaneously activate. The activation then spreads through the other cells in the same way as fe.py
 
 \subsubsection{myocyte\textunderscore activation.py}
-this program selects some areas as nodes in a purkinje network (see below), and adds a stimulus on these cells. The stimulus then spreads through the rest of the heart. This simulation uses a 3D heart mesh. The front page picture is from this simulation
+this program selects some areas as nodes in a purkinje network (see below), and adds a stimulus on these cells. The stimulus then spreads through the rest of the heart. This simulation uses a 3D heart mesh. The front page picture is from this simulation.
+
+\subsubsection{The final run}
+In the folder ``the\textunderscore final\textunderscore run'' there is the python file \verb myocyte_activation_redoux.py , which solves the monodomain heart equations, as well as the elliptical equation for the rest of the torso; 
+\begin{equation}
+ \nabla \cdot (M_i \nabla v) + \nabla \cdot (M\nabla u_e) = 0
+\end{equation}
+where $M = M_e+M_i$ inside the heart, and $M=M_o$ outside the heart. The tensors in this case are taken from a simulation using the fiberrules package (ask around at simula to get access to this). In order to set $M$, some really roundabout functions are used, \verb get_inner_heart_tensor()  and \verb get_torso_tensor() . What they do is to extract the 9 different scalar fields found in the 3 vector fields, and manually compute the cross product of the vectors. I'm not sure why this was neccessary, but not doing it in this way would cause the program to crash, saying that the function was not defined on the domain. This program marks the end of my intership. 
+
 
 \subsection{Other stuff}
 Here we'll explain some of the other code. 
+
+\subsubsection{extracellular\textunderscore solver.py}
+This program solves the elliptical equation for the torso; 
+\begin{equation}
+ \nabla \cdot (M_i \nabla v) + \nabla \cdot (M\nabla u_e) = 0
+\end{equation}
+where $M = M_e+M_i$ inside the heart, and $M=M_o$ outside the heart. Essentially this code only does the solution step, and the user must take care of the map from the torso to the heart for $v$, as well as setting up the tensors for the different domains. For an example, see ``the final run''. 
+
+\subsubsection{storing part of the solution vector}
+In some cases, we might not be able to store the entire solution vector from a simulation. This might be simply because the solution takes up too much space. There are several ways of doing this, and I will only propose one here. We begin by storing the coordinates for the point we would like to save
+\begin{lstlisting}
+ points = np.array([[0.0,0.0,0.0], [1.0, 1.0, 1.0]])
+\end{lstlisting}
+We then need to find the appropriate vertices in the mesh. In 2D we can use the FEniCS function \verb closest_point() , but this does not work in 3D. Rather, we can do it like this
+\begin{lstlisting}
+ n = points.shape[0]
+ for i in range(n):
+    point = points[i]
+    distance_vec = mesh.coordinates() - point
+    distances = distance_vec[0]**2 + distance_vec[1]**2 + distance_vec[2]**2
+    point_idx = np.argmin(distances)
+    dof_idx = vertex_to_dof_map[point_idx]
+    point_to_store[i] = dof_idx
+\end{lstlisting}
+now that we have these points. We can at each time iteration store them by 
+\begin{lstlisting}
+ u_array = solver.v_n.vector().array()
+ u_array_save = u_array[points_to_store]
+ np.save(filename,u_array_save)
+\end{lstlisting}
+
+
 
 \subsubsection{purkinje}
 The spontaneous heart activation starts in the atrium, then passes through a common point (the Atrioventricular node) before its spreads to the ventricles. The spread happens mainly through the so-called purkinje fibers (the propagation is several hundred times faster through these cells than regular heart tissue). The purkinje files models such nerves based on the same heart mesh used in myocyte\textunderscore activation. The leaf nodes found by this model are used for the activation is this program. 
@@ -28,6 +68,7 @@ Nose tests is a simple tools for performin unit testing of the code. One can tes
 the extra commands are because the testing tool picks up some fenics functions that we do not want to test. 
 
 These are somewhat outdated at this point, and should be overhauled, but I'm not sure if there will be time for this during my stint. 
+
 
 
 \subsubsection{dolfin mesh from triangle}
@@ -85,8 +126,42 @@ interactive()
 This code is also included in the file \verb testcode.py . 
 
 \subsubsection{grid and tetgen}
-a
+The folder \verb /grid/meshes  contains, among other things the file reference.poly which is similar to the triangle file, but 3-dimensional. To convert this to a dolfin mesh, we can use the following method.
+
+dolfin has a standard converter to xml files, called by
+\begin{verbatim}
+dolfin-convert <infile> <outfile>
+\end{verbatim}
+Normally we create the .ele and .node files by calling
+\begin{verbatim}
+tetgen -qA -a0.01 -P reference.poly 
+\end{verbatim}
+The problem is that dolfin interprets, the .ele and .node files as 2d triangle meshes, and projects them onto the x,y-plane. We can circumvent this by also outputing a .mesh file from tetgen, by inputing
+\begin{verbatim}
+tetgen -qA -a0.01 -g reference.poly 
+\end{verbatim}
+(i.e. add -g), which will create the file "reference.1.mesh". This can be converted to a 3d mesh by calling 
+\begin{verbatim}
+dolfin-convert reference.1.mesh reference.xml
+\end{verbatim}
+There is also a mesh function in the .poly-file. To obtain this, we can use the following hack: 
+
+1) run
+\begin{verbatim}
+dolfin-convert reference.1.ele func.xml
+\end{verbatim}
+2) The function will now be stored in func.attr0.xml. However, it will have the wrong dimension. The solution is simply to open the file in any text editor, change 'dim="2"' to 'dim="3"' on the 4th line, and save the changes. 
+
+3) the function can now be plotted normally using standard commands such as 
+\begin{lstlisting}
+from dolfin import *
+mesh = Mesh('reference.xml')
+meshfunc = MeshFunction('double', mesh, 'func.attr0.xml')
+plot(meshfunc)
+interactive()
+\end{lstlisting}
+
 
 \subsubsection{dolfin\textunderscore animation\textunderscore tools.py}
-a
+This file contains some useful functions for visualizing the results in mayavi, and saving the results. Note that this only works for unit squares and unit cubes. General meshes are not supported. 
 

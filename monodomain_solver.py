@@ -76,14 +76,13 @@ class Monodomain_solver:
 		elif isinstance(mesh,Mesh):
 			self.mesh = Mesh(mesh)
 			self.V = FunctionSpace(self.mesh, space, order)
-
 		else:
 			print "input not understood! Exiting..."
 			sys.exit(1)
 
 		self.V = FunctionSpace(self.mesh, space, order)
-		self.V_t = TensorFunctionSpace(self.mesh, space, order)
-		self.V_v = VectorFunctionSpace(self.mesh, space, order)
+		#self.V_t = TensorFunctionSpace(self.mesh, space, order)
+		#self.V_v = VectorFunctionSpace(self.mesh, space, order)
 
 		self.vertex_to_dof_map = self.V.dofmap().vertex_to_dof_map(self.V.mesh())
 		self.geometry_set = True
