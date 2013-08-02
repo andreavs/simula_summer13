@@ -169,6 +169,29 @@ def find_leaf_nodes(mesh,radius=0.3, ratio_of_nodes = 0.3):
 	return marks_vector
 
 
+def alt_find_leaf_nodes(mesh,radius=0.4):
+	marks_vector = np.zeros(fenics_ordered_coordinates.shape[0])
+	root_idx = 3502
+	root_coor = mesh.coordinates()[root_idx,:]
+	leaf_nodes = np.loadtxt('purkinje_fewer.txt')
+
+	r = radius #some radius
+	rr = r**2
+	marks_vector = np.zeros(fenics_ordered_coordinates.shape[0])
+	C = fenics_ordered_coordinates # short hand 
+
+	for i in range(leaf_nodes.shape[0]):
+		leaf_coor = leaf_nodes[i,:]
+		dist = C-leaf_coor
+		dist = dist**2
+		dist = np.sum(dist, axis=1)
+		leaf_idx = np.argwhere(dist < rr)
+		dist_float = C[leaf_idx,:] - root_coor
+		dist_float = np.sqrt(np.sum(dist_float**2, axis=1))
+		marks_vector[leaf_idx] = dist_float
+
+	print marks_vector[marks_vector != 0] 
+	return marks_vector
 
 
 if __name__ == '__main__':
@@ -180,7 +203,7 @@ if __name__ == '__main__':
 	# Set up the solver
 	solver = Monodomain_solver(dim=3, dt=dt)
 	method = Time_solver('CN')
-	mesh = Mesh('meshes/reference.xml.gz')
+	mesh = Mesh('meshes/heart.xml')
 	solver.set_geometry(mesh)
 	solver.set_time_solver_method(method)
 	solver.set_M(get_tensor())
@@ -193,7 +216,7 @@ if __name__ == '__main__':
 	vertex_to_dof_map =  V.dofmap().vertex_to_dof_map(mesh)
 	fenics_ordered_coordinates = mesh.coordinates()[vertex_to_dof_map]
 	N_thread = fenics_ordered_coordinates.shape[0]
-	p = find_leaf_nodes(mesh) ### p now contains the distances to the leaf nodes
+	p = alt_find_leaf_nodes(mesh) ### p now contains the distances to the leaf nodes
 	ode = jit(load_ode("myocyte.ode"))
 
 
@@ -298,7 +321,9 @@ if __name__ == '__main__':
 	torso_solver.set_bcs(torso_bcs)
 	torso_solver.set_form()
 	torso_solver.solve_for_u()
-
+	a = plot(solver.v_n, interactive=True)
+	b = plot(bidomain_elliptic.u_n, interactive=True)
+	c = plot(torso_solver.u_n, interactive=True)
 	for i in range(200):
 		solver.solve_for_time_step()
 		bidomain_elliptic.set_v(solver.v_n.vector().array())
@@ -309,11 +334,11 @@ if __name__ == '__main__':
 		v.vector().set_local(values)
 		torso_solver.solve_for_u()
 		padded_index = '%04d' % i
-		a = plot(solver.v_n)
+		a = plot(solver.v_n, interactive=False)
 		a.write_png('heart_cross_pot_' + padded_index)
-		b = plot(bidomain_elliptic.u_n)
+		b = plot(bidomain_elliptic.u_n, interactive=False)
 		b.write_png('heart_extracellular_' + padded_index)
-		c = plot(torso_solver.u_n)
+		c = plot(torso_solver.u_n, interactive=False)
 		c.write_png('torso_' + padded_index)
 
 

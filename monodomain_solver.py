@@ -6,6 +6,8 @@ from dolfin import *
 import types
 import goss
 import gotran
+from ufl.algebra import Sum
+from ufl.tensors import ListTensor
 
 
 class Monodomain_solver: 
@@ -47,7 +49,7 @@ class Monodomain_solver:
 		self.D = default_D
 
 
-	def set_geometry(self, mesh, space='Lagrange', order=1):
+	def set_geometry(self, mesh, space='CG', order=1):
 		print 'setting geometry... ',
 		domain_type = [UnitIntervalMesh, UnitSquareMesh, UnitCubeMesh]
 		self.meshtype = mesh
@@ -78,6 +80,11 @@ class Monodomain_solver:
 		else:
 			print "input not understood! Exiting..."
 			sys.exit(1)
+
+		self.V = FunctionSpace(self.mesh, space, order)
+		self.V_t = TensorFunctionSpace(self.mesh, space, order)
+		self.V_v = VectorFunctionSpace(self.mesh, space, order)
+
 		self.vertex_to_dof_map = self.V.dofmap().vertex_to_dof_map(self.V.mesh())
 		self.geometry_set = True
 		print 'geometry set!'
@@ -122,7 +129,18 @@ class Monodomain_solver:
 
 	def set_M(self, M):
 		#takes in a tuple and sets M as a FEniCS tensor 
-		self.M = as_tensor(M)
+		if isinstance(M, tuple):
+			self.M = as_tensor(M)
+		elif isinstance(M, Sum):
+			self.M = project(M,self.W)
+		elif isinstance(M,Function):
+			self.M = M
+		elif isinstance(M,ListTensor):
+			self.M = M
+		else:
+			print 'tensor input not understood'
+			sys.exit(1)
+
 		self.M_set = True
 
 	def set_time_solver_method(self,method):
@@ -137,6 +155,14 @@ class Monodomain_solver:
 			Dt_v_k_n = self.v-self.v_p
 			v_mid = theta*self.v + (1-theta)*self.v_p
 			dt = Constant(self.dt)
+
+
+			# M_grad_v_p = self.M*nabla_grad(self.v_p)
+			# inner_prod = project(inner(M_grad_v_p, nabla_grad(self.v_p)),self.V)
+			# plot(inner_prod)
+			# interactive()
+
+
 			form = (Dt_v_k_n*self.w + self.D(self.v_p)*dt*inner(self.M*nabla_grad(v_mid), nabla_grad(self.w)))*dx
 			(self.a, self.L) = system(form)
 			self.form_set = True

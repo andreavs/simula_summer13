@@ -11,6 +11,7 @@ def get_tree(E,N,surface, C):
 	idx = np.argmin(dist)
 	root = admisable[idx]
 	E_root = root +1### this index is used to look up value in a table that uses matlab indices... 
+
 	# im confus! 
 
 
@@ -57,4 +58,4 @@ def get_tree(E,N,surface, C):
 	#adj = np.linalg.sparse(adj)
 	return adj, distance, terminal
 
-	
+

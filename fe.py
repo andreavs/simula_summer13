@@ -61,7 +61,7 @@ def advance(self, u, t, dt):
 	assert(isinstance(u, Function))
 	goss_solver = self.goss_solver
 	dof_temp_values = u.vector().array()
-	goss_solver.get_field_states(self.vertex_temp_values)
+	goss_solver.get_field_states(self.vertex_temp_values) ##dont worri
 	self.vertex_temp_values[self.vertex_to_dof_map] = dof_temp_values
 	goss_solver.set_field_states(self.vertex_temp_values)
 
@@ -74,7 +74,7 @@ def advance(self, u, t, dt):
 	goss_solver.forward(t, dt)
 
 	goss_solver.get_field_states(self.vertex_temp_values)
-	dof_temp_values[:] = self.vertex_temp_values[self.vertex_to_dof_map]
+	dof_temp_values = self.vertex_temp_values[self.vertex_to_dof_map]
 	u.vector().set_local(dof_temp_values)
 	u.vector().apply('insert')
 	return u

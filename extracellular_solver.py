@@ -74,8 +74,22 @@ class Extracellular_solver:
 
 	def set_M(self, M_i, M_e):
 		#takes in a tuple and sets M as a FEniCS tensor 
-		self.M_i = as_tensor(M_i)
-		self.M_e = as_tensor(M_e)
+		if isinstance(M_i, tuple):
+			self.M_i = as_tensor(M_i)
+		elif isinstance(M_i, Sum):
+			self.M_i = M_i
+		else:
+			print 'tensor input not understood'
+			sys.exit(1)
+
+		if isinstance(M_e, tuple):
+			self.M_e = as_tensor(M_e)
+		elif isinstance(M_e, Sum):
+			self.M_e = M_e
+		else:
+			print 'tensor input not understood'
+			sys.exit(1)
+
 		self.M_set = True
 
 	def set_form(self):

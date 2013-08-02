@@ -68,9 +68,16 @@ class Torso_solver:
 
 	def set_M(self, M_o):
 		#takes in a tuple and sets M as a FEniCS tensor 
-		self.M_o = as_tensor(M_o)
+		if isinstance(M, tuple):
+			self.M = as_tensor(M)
+		elif isinstance(M, Sum):
+			self.M = M
+		else:
+			print 'tensor input not understood'
+			sys.exit(1)
 		self.M_set = True
 
+		
 	def set_form(self):
 		if self.M_set and self.geometry_set and self.bcs_set:
 			M_grad_u = (self.M_o)*nabla_grad(self.u)
@@ -86,8 +93,8 @@ class Torso_solver:
 			#bc = DirichletBC(self.V, Constant(0.0), boundary)
 			#print self.v.vector().array().shape, self.u.vector().array().shape, self.u_n.vector().array().shape
 			#adisas
-			solve(self.a == self.L, self.u_n, self.bcs)#, solver_parameters={"linear_solver": "gmres", "symmetric": True}, \
-      			#form_compiler_parameters={"optimize": True})
+			solve(self.a == self.L, self.u_n, self.bcs, solver_parameters={"linear_solver": "gmres"}, \
+      			form_compiler_parameters={"optimize": True})
 			
 
 		else:
